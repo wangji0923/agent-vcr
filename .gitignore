@@ -1,0 +1,21 @@
+# Build outputs
+/bin/
+/dist/
+/coverage/
+*.exe
+*.test
+*.out
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local planning documents
+/docs/
