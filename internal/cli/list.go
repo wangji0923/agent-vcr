@@ -35,7 +35,7 @@ func renderRunList(runs []runlist.Summary) string {
 	if len(runs) == 0 {
 		return "No runs found.\n"
 	}
-	headers := []string{"ID", "Source", "Status", "Started", "Ended", "Tools", "Files", "Tests"}
+	headers := []string{"ID", "Source", "Status", "Started", "Ended", "Tools", "Delta", "Tests"}
 	rows := make([][]string, 0, len(runs)+1)
 	rows = append(rows, headers)
 	for _, run := range runs {

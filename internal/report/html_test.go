@@ -28,8 +28,10 @@ func TestHTMLReportContainsSummaryTimelineAndFinalDiff(t *testing.T) {
 	}
 	events := []trace.Event{
 		event("evt-1", 1, trace.EventRunStart, trace.Payload{"command": "agent"}),
-		event("evt-2", 2, trace.EventShellCommand, trace.Payload{"command": "go test ./...", "tool_name": "shell"}),
-		event("evt-3", 3, trace.EventProcessResult, trace.Payload{"command": "go test ./...", "exit_code": 0, "changed_files": []string{"src/app.go"}}),
+		event("evt-2", 2, trace.EventUserPrompt, trace.Payload{"turn_id": "turn-1", "prompt": "[REDACTED:prompt]", "prompt_sha256": "prompt-hash"}),
+		event("evt-3", 3, trace.EventShellCommand, trace.Payload{"command": "go test ./...", "tool_name": "shell"}),
+		event("evt-4", 4, trace.EventProcessResult, trace.Payload{"command": "go test ./...", "exit_code": 0, "changed_files": []string{"src/app.go"}}),
+		event("evt-5", 5, trace.EventRunStop, trace.Payload{"turn_id": "turn-1", "last_assistant_message": "[REDACTED:assistant_message]", "last_assistant_message_sha256": "output-hash"}),
 	}
 
 	data, err := Build(runDir, meta, events, config.Default())
@@ -43,6 +45,11 @@ func TestHTMLReportContainsSummaryTimelineAndFinalDiff(t *testing.T) {
 	html := out.String()
 	for _, want := range []string{
 		"Run Summary",
+		"Run Input And Output",
+		"prompt-hash",
+		"output-hash",
+		"[REDACTED:prompt]",
+		"[REDACTED:assistant_message]",
 		"Timeline",
 		"Final Diff",
 		"go test ./...",
@@ -85,7 +92,8 @@ func TestHTMLReportAppliesSecretRedaction(t *testing.T) {
 	writePatch(t, runDir, "secret.diff", "+OPENAI_API_KEY="+secret+"\n")
 	meta := trace.Metadata{RunID: "run-secret", Source: "fixture", Status: trace.RunStatusCompleted}
 	events := []trace.Event{
-		event("evt-secret", 1, trace.EventToolCall, trace.Payload{"tool_name": "shell", "api_key": secret, "command": "echo " + secret}),
+		event("evt-prompt-secret", 1, trace.EventUserPrompt, trace.Payload{"prompt": "use " + secret, "prompt_sha256": "secret-prompt-hash"}),
+		event("evt-secret", 2, trace.EventToolCall, trace.Payload{"tool_name": "shell", "api_key": secret, "command": "echo " + secret}),
 	}
 	data, err := Build(runDir, meta, events, config.Default())
 	if err != nil {

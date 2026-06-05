@@ -27,6 +27,7 @@ var templateFS embed.FS
 type ReportData struct {
 	Metadata      trace.Metadata
 	Summary       ReportSummary
+	InputOutput   ReportInputOutput
 	Timeline      []analysis.TimelineItem
 	CheckResult   *analysis.CheckResult
 	FinalDiff     string
@@ -56,6 +57,16 @@ type CommandSummary struct {
 	Command  string
 	ToolName string
 	ExitCode string
+}
+
+type ReportInputOutput struct {
+	TurnID        string
+	Input         string
+	InputSHA256   string
+	InputEventID  string
+	Output        string
+	OutputSHA256  string
+	OutputEventID string
 }
 
 type EventDetail struct {
@@ -135,6 +146,7 @@ func Build(runDir string, meta trace.Metadata, events []trace.Event, cfg config.
 	return ReportData{
 		Metadata:      redactedMeta,
 		Summary:       summary,
+		InputOutput:   buildInputOutput(redactedEvents),
 		Timeline:      timeline,
 		CheckResult:   &check,
 		FinalDiff:     finalDiff,
@@ -176,6 +188,29 @@ func redactMetadata(meta trace.Metadata, cfg config.RedactConfig) trace.Metadata
 	var out trace.Metadata
 	if err := json.Unmarshal(data, &out); err != nil {
 		return meta
+	}
+	return out
+}
+
+func buildInputOutput(events []trace.Event) ReportInputOutput {
+	var out ReportInputOutput
+	for _, event := range events {
+		switch event.Type {
+		case trace.EventUserPrompt:
+			if value := payloadString(event.Payload, "turn_id"); value != "" {
+				out.TurnID = value
+			}
+			out.Input = payloadString(event.Payload, "prompt", "content", "message", "text", "input")
+			out.InputSHA256 = payloadString(event.Payload, "prompt_sha256", "content_sha256", "message_sha256", "input_sha256")
+			out.InputEventID = event.EventID
+		case trace.EventRunStop, trace.EventModelResult:
+			if value := payloadString(event.Payload, "turn_id"); value != "" {
+				out.TurnID = value
+			}
+			out.Output = payloadString(event.Payload, "last_assistant_message", "assistant_message", "output", "message", "text", "content")
+			out.OutputSHA256 = payloadString(event.Payload, "last_assistant_message_sha256", "assistant_message_sha256", "output_sha256", "message_sha256", "content_sha256")
+			out.OutputEventID = event.EventID
+		}
 	}
 	return out
 }

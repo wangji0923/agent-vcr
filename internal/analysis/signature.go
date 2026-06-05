@@ -58,8 +58,9 @@ func Signature(event trace.Event) EventSignature {
 		})
 	case trace.EventRunStop:
 		sig.ResultHash = hashAny(map[string]any{
-			"status":    signaturePayloadString(event.Payload, "status"),
-			"exit_code": sig.ExitCode,
+			"status":        signaturePayloadString(event.Payload, "status"),
+			"exit_code":     sig.ExitCode,
+			"output_sha256": signaturePayloadString(event.Payload, "last_assistant_message_sha256", "assistant_message_sha256", "output_sha256", "message_sha256", "content_sha256"),
 		})
 	case trace.EventRaw:
 		if event.RawRef != nil && event.RawRef.SHA256 != "" {

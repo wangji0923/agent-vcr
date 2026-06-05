@@ -109,7 +109,10 @@ func applyMetadata(summary *Summary, meta trace.Metadata) {
 
 func applyEvents(summary *Summary, events []trace.Event, runDir string, metaSummary trace.Payload) {
 	changed := map[string]bool{}
-	addFiles(changed, stringSliceFromAny(metaSummary["changed_files"]))
+	hasSummaryChangedFiles := hasPayloadKey(metaSummary, "changed_files")
+	if hasSummaryChangedFiles {
+		addFiles(changed, stringSliceFromAny(metaSummary["changed_files"]))
+	}
 	for _, key := range []string{"final_diff_blob", "patch_blob"} {
 		if path := stringFromAny(metaSummary[key]); path != "" {
 			addFiles(changed, analysis.ChangedFilesFromPatch(runDir, path))
@@ -118,6 +121,7 @@ func applyEvents(summary *Summary, events []trace.Event, runDir string, metaSumm
 
 	var testSummaries []testCommand
 	pendingTests := map[string]int{}
+	var patchPaths []string
 	for _, event := range events {
 		if summary.Source == "unknown" && event.Source.Adapter != "" {
 			summary.Source = event.Source.Adapter
@@ -136,10 +140,12 @@ func applyEvents(summary *Summary, events []trace.Event, runDir string, metaSumm
 		if event.Type == trace.EventToolCall {
 			summary.ToolCalls++
 		}
-		addFiles(changed, filesFromEvent(event))
+		if !hasSummaryChangedFiles && eventCarriesRunDelta(event.Type) {
+			addFiles(changed, filesFromEvent(event))
+		}
 		for _, artifact := range event.Artifacts {
 			if artifact.Kind == trace.ArtifactPatch {
-				addFiles(changed, analysis.ChangedFilesFromPatch(runDir, artifact.Path))
+				patchPaths = append(patchPaths, artifact.Path)
 			}
 		}
 		if command := commandFromEvent(event); command != "" && isLikelyTestCommand(command) {
@@ -160,7 +166,10 @@ func applyEvents(summary *Summary, events []trace.Event, runDir string, metaSumm
 			}
 		}
 	}
-	if len(changed) == 0 {
+	if !hasSummaryChangedFiles && len(changed) == 0 {
+		addFiles(changed, changedFilesFromPatchDelta(runDir, patchPaths))
+	}
+	if !hasSummaryChangedFiles && len(changed) == 0 {
 		addFiles(changed, stringSliceFromAny(metaSummary["files"]))
 	}
 	summary.ChangedFiles = len(changed)
@@ -270,6 +279,113 @@ func addFiles(target map[string]bool, files []string) {
 	}
 }
 
+func eventCarriesRunDelta(typ trace.EventType) bool {
+	switch typ {
+	case trace.EventFilePatch, trace.EventFileWrite, trace.EventProcessResult:
+		return true
+	default:
+		return false
+	}
+}
+
+func changedFilesFromPatchDelta(runDir string, patchPaths []string) []string {
+	if len(patchPaths) == 0 {
+		return nil
+	}
+	first := patchSectionsFromArtifact(runDir, patchPaths[0])
+	last := patchSectionsFromArtifact(runDir, patchPaths[len(patchPaths)-1])
+	if len(first) == 0 {
+		return sortedPatchSectionKeys(last)
+	}
+	if len(last) == 0 {
+		return sortedPatchSectionKeys(first)
+	}
+	seen := map[string]bool{}
+	var files []string
+	for file, after := range last {
+		if before := first[file]; before != after {
+			seen[file] = true
+			files = append(files, file)
+		}
+	}
+	for file := range first {
+		if _, ok := last[file]; !ok && !seen[file] {
+			files = append(files, file)
+		}
+	}
+	sort.Strings(files)
+	return files
+}
+
+func patchSectionsFromArtifact(runDir string, relPath string) map[string]string {
+	if relPath == "" {
+		return map[string]string{}
+	}
+	path := filepath.Join(runDir, filepath.FromSlash(relPath))
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return map[string]string{}
+	}
+	return patchSections(string(data))
+}
+
+func patchSections(data string) map[string]string {
+	sections := map[string]string{}
+	var file string
+	var lines []string
+	flush := func() {
+		if file != "" {
+			sections[file] = strings.Join(trimTrailingEmptyLines(lines), "\n")
+		}
+	}
+	for _, line := range strings.Split(data, "\n") {
+		if strings.HasPrefix(line, "diff --git ") {
+			flush()
+			file = patchFileFromDiffHeader(line)
+			lines = []string{line}
+			continue
+		}
+		if file == "" {
+			continue
+		}
+		lines = append(lines, line)
+	}
+	flush()
+	return sections
+}
+
+func trimTrailingEmptyLines(lines []string) []string {
+	for len(lines) > 0 && lines[len(lines)-1] == "" {
+		lines = lines[:len(lines)-1]
+	}
+	return lines
+}
+
+func patchFileFromDiffHeader(line string) string {
+	parts := strings.Fields(line)
+	if len(parts) < 4 {
+		return ""
+	}
+	path := strings.Trim(parts[3], `"`)
+	path = strings.TrimPrefix(path, "b/")
+	path = strings.TrimPrefix(path, "a/")
+	if path == "/dev/null" {
+		return ""
+	}
+	return path
+}
+
+func sortedPatchSectionKeys(sections map[string]string) []string {
+	files := make([]string, 0, len(sections))
+	for file := range sections {
+		if file != "" {
+			files = append(files, file)
+		}
+	}
+	sort.Strings(files)
+	return files
+}
+
 func correlationKey(event trace.Event) string {
 	for _, key := range []string{"tool_use_id", "call_id", "id"} {
 		if value := firstString(event.Payload, key); value != "" {
@@ -302,6 +418,14 @@ func firstString(payload map[string]any, keys ...string) string {
 		}
 	}
 	return ""
+}
+
+func hasPayloadKey(payload trace.Payload, key string) bool {
+	if payload == nil {
+		return false
+	}
+	_, ok := payload[key]
+	return ok
 }
 
 func stringFromAny(value any) string {

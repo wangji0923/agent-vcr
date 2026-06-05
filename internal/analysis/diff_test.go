@@ -74,6 +74,34 @@ func TestDiffIgnoresTimestampAndVolatileFields(t *testing.T) {
 	}
 }
 
+func TestDiffDetectsPromptHashMismatch(t *testing.T) {
+	runA := RunData{RunID: "a", Events: []trace.Event{
+		testEvent("a1", "a", 1, trace.EventUserPrompt, trace.Payload{"prompt_sha256": "prompt-a"}),
+	}}
+	runB := RunData{RunID: "b", Events: []trace.Event{
+		testEvent("b1", "b", 1, trace.EventUserPrompt, trace.Payload{"prompt_sha256": "prompt-b"}),
+	}}
+
+	result := DiffRuns(runA, runB)
+	if result.FirstDivergence == nil || result.FirstDivergence.Reason != "user_prompt_signature_mismatch" {
+		t.Fatalf("first divergence = %#v, want user_prompt_signature_mismatch", result.FirstDivergence)
+	}
+}
+
+func TestDiffDetectsAssistantOutputHashMismatch(t *testing.T) {
+	runA := RunData{RunID: "a", Events: []trace.Event{
+		testEvent("a1", "a", 1, trace.EventRunStop, trace.Payload{"last_assistant_message_sha256": "output-a"}),
+	}}
+	runB := RunData{RunID: "b", Events: []trace.Event{
+		testEvent("b1", "b", 1, trace.EventRunStop, trace.Payload{"last_assistant_message_sha256": "output-b"}),
+	}}
+
+	result := DiffRuns(runA, runB)
+	if result.FirstDivergence == nil || result.FirstDivergence.Reason != "run_stop_signature_mismatch" {
+		t.Fatalf("first divergence = %#v, want run_stop_signature_mismatch", result.FirstDivergence)
+	}
+}
+
 func TestChangedFilesDiff(t *testing.T) {
 	runA := RunData{RunID: "a", Events: []trace.Event{
 		testEvent("a1", "a", 1, trace.EventProcessResult, trace.Payload{

@@ -23,6 +23,8 @@
     summary { cursor: pointer; font-weight: 600; }
     .muted { color: var(--muted); }
     .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .io-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .io-meta { margin: 0 0 8px; font-size: 12px; }
     .metric { padding: 12px; background: #f4f7f7; border: 1px solid var(--line); border-radius: 6px; }
     .metric strong { display: block; font-size: 22px; margin-top: 4px; }
     .status-completed, .status-pass { color: var(--accent); }
@@ -30,7 +32,7 @@
     .warning { color: var(--warn); }
     .pill { display: inline-block; padding: 2px 7px; border: 1px solid var(--line); border-radius: 999px; background: #f6f8fa; font-size: 12px; }
     ul.clean { margin: 0; padding-left: 18px; }
-    @media (max-width: 760px) { main { padding: 14px; } .grid { grid-template-columns: 1fr 1fr; } table { font-size: 13px; } }
+    @media (max-width: 760px) { main { padding: 14px; } .grid, .io-grid { grid-template-columns: 1fr; } table { font-size: 13px; } }
   </style>
 </head>
 <body>
@@ -39,6 +41,25 @@
     <h1>agent-vcr report</h1>
     <div class="muted">Run <code>{{ .Summary.RunID }}</code> generated {{ .GeneratedAt.Format "2006-01-02T15:04:05Z07:00" }}</div>
   </header>
+
+  <section>
+    <h2>Run Input And Output</h2>
+    {{ with .InputOutput }}
+      {{ if .TurnID }}<p class="io-meta muted">Turn <code>{{ .TurnID }}</code></p>{{ end }}
+      <div class="io-grid">
+        <div>
+          <h3>Input</h3>
+          {{ if .InputEventID }}<p class="io-meta muted">event <code>{{ .InputEventID }}</code>{{ if .InputSHA256 }} / sha256 <code>{{ .InputSHA256 }}</code>{{ end }}</p>{{ else if .InputSHA256 }}<p class="io-meta muted">sha256 <code>{{ .InputSHA256 }}</code></p>{{ end }}
+          {{ if .Input }}<pre>{{ .Input }}</pre>{{ else }}<span class="muted">No user input recorded.</span>{{ end }}
+        </div>
+        <div>
+          <h3>Output</h3>
+          {{ if .OutputEventID }}<p class="io-meta muted">event <code>{{ .OutputEventID }}</code>{{ if .OutputSHA256 }} / sha256 <code>{{ .OutputSHA256 }}</code>{{ end }}</p>{{ else if .OutputSHA256 }}<p class="io-meta muted">sha256 <code>{{ .OutputSHA256 }}</code></p>{{ end }}
+          {{ if .Output }}<pre>{{ .Output }}</pre>{{ else }}<span class="muted">No assistant output recorded.</span>{{ end }}
+        </div>
+      </div>
+    {{ end }}
+  </section>
 
   <section>
     <h2>Run Summary</h2>
