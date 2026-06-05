@@ -1,0 +1,11 @@
+Run: 20260604T020000Z-simple
+Source: codex-hooks
+Status: completed
+Git: abc1234
+
+00:00 run_start      session started
+00:05 user_prompt    Add replay list support
+00:12 tool           Bash go test ./... -> exit 0
+00:30 tool           apply_patch -> exit 0, changed 2 files [internal/cli/list.go, internal/cli/replay.go] {patches/final.diff (86 bytes)}
+00:50 raw            raw event -> raw/unknown.json (32 bytes)
+02:00 run_stop       completed

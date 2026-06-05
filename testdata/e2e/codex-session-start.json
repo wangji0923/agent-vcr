@@ -1,0 +1,8 @@
+{
+  "session_id": "agent-vcr-e2e-session",
+  "cwd": __CWD_JSON__,
+  "hook_event_name": "SessionStart",
+  "model": "gpt-5",
+  "permission_mode": "workspace-write",
+  "transcript_path": "agent-vcr-e2e-transcript.jsonl"
+}

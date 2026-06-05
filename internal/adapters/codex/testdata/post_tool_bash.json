@@ -1,0 +1,14 @@
+{
+  "session_id": "s_1234567890abcdef",
+  "cwd": ".",
+  "hook_event_name": "PostToolUse",
+  "turn_id": "turn_1",
+  "tool_name": "Bash",
+  "tool_use_id": "toolu_1",
+  "tool_response": {
+    "exit_code": 0,
+    "stdout": "total 0\n",
+    "stderr": "",
+    "is_error": false
+  }
+}

@@ -1,0 +1,22 @@
+Run A: good
+Run B: bad
+
+First divergence at normalized event #2
+Reason: tool_sequence_mismatch
+
+A:
+  tool_call Bash rg "session" src tests
+
+B:
+  tool_call Bash rg "cookie" src
+
+Summary:
+  A events: 2
+  B events: 2
+  A tool calls: 1
+  B tool calls: 1
+  A changed files: 0
+  B changed files: 0
+  Tool sequence differences: 0
+  Changed file differences: 0
+  Command exit code differences: 0

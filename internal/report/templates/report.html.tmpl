@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>agent-vcr report {{ .Summary.RunID }}</title>
+  <style>
+    :root { color-scheme: light; --bg: #f7f8fa; --panel: #ffffff; --line: #d8dde6; --text: #18202c; --muted: #657084; --accent: #126d6d; --warn: #9f5c00; --err: #b42318; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    main { max-width: 1180px; margin: 0 auto; padding: 24px; }
+    h1 { margin: 0 0 6px; font-size: 28px; font-weight: 700; letter-spacing: 0; }
+    h2 { margin: 0 0 12px; font-size: 18px; letter-spacing: 0; }
+    h3 { margin: 0 0 8px; font-size: 15px; letter-spacing: 0; }
+    section { margin-top: 18px; padding: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+    th { color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 650; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; }
+    pre { margin: 0; padding: 12px; max-height: 460px; overflow: auto; background: #f0f3f6; border: 1px solid var(--line); border-radius: 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    details { padding: 8px 0; border-bottom: 1px solid var(--line); }
+    details:last-child { border-bottom: 0; }
+    summary { cursor: pointer; font-weight: 600; }
+    .muted { color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .metric { padding: 12px; background: #f4f7f7; border: 1px solid var(--line); border-radius: 6px; }
+    .metric strong { display: block; font-size: 22px; margin-top: 4px; }
+    .status-completed, .status-pass { color: var(--accent); }
+    .status-failed, .status-fail { color: var(--err); }
+    .warning { color: var(--warn); }
+    .pill { display: inline-block; padding: 2px 7px; border: 1px solid var(--line); border-radius: 999px; background: #f6f8fa; font-size: 12px; }
+    ul.clean { margin: 0; padding-left: 18px; }
+    @media (max-width: 760px) { main { padding: 14px; } .grid { grid-template-columns: 1fr 1fr; } table { font-size: 13px; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>agent-vcr report</h1>
+    <div class="muted">Run <code>{{ .Summary.RunID }}</code> generated {{ .GeneratedAt.Format "2006-01-02T15:04:05Z07:00" }}</div>
+  </header>
+
+  <section>
+    <h2>Run Summary</h2>
+    <div class="grid">
+      <div class="metric"><span class="muted">Status</span><strong class="status-{{ .Summary.Status }}">{{ .Summary.Status }}</strong></div>
+      <div class="metric"><span class="muted">Tool Calls</span><strong>{{ .Summary.ToolCalls }}</strong></div>
+      <div class="metric"><span class="muted">Changed Files</span><strong>{{ len .Summary.ChangedFiles }}</strong></div>
+      <div class="metric"><span class="muted">Raw Events</span><strong>{{ .RawEventCount }}</strong></div>
+    </div>
+    <table>
+      <tbody>
+        <tr><th>Source</th><td>{{ .Summary.Source }}</td></tr>
+        <tr><th>Source Adapter</th><td>{{ .Summary.SourceAdapter }}</td></tr>
+        <tr><th>Started</th><td>{{ .Summary.StartedAt }}</td></tr>
+        <tr><th>Ended</th><td>{{ .Summary.EndedAt }}</td></tr>
+        <tr><th>Duration</th><td>{{ .Duration }}</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Capabilities</h2>
+    {{ if .Capabilities }}
+      {{ range .Capabilities }}<span class="pill">{{ .Name }}={{ .Enabled }}</span> {{ end }}
+    {{ else }}
+      <span class="muted">No capabilities recorded.</span>
+    {{ end }}
+  </section>
+
+  <section>
+    <h2>Risk And Check Findings</h2>
+    {{ with .CheckResult }}
+      <p>status: <strong class="{{ if .Passed }}status-pass{{ else }}status-fail{{ end }}">{{ if .Passed }}pass{{ else }}fail{{ end }}</strong>, risk score: <strong>{{ .RiskScore }}</strong></p>
+      {{ if .Violations }}
+        <h3>Violations</h3>
+        <ul class="clean">{{ range .Violations }}<li>[{{ .Severity }}] {{ .RuleID }}: {{ .Message }} {{ if .EventID }}<code>{{ .EventID }}</code>{{ end }} {{ if .Path }}<code>{{ .Path }}</code>{{ end }}</li>{{ end }}</ul>
+      {{ else }}
+        <p class="muted">No violations.</p>
+      {{ end }}
+      {{ if .Warnings }}
+        <h3>Warnings</h3>
+        <ul class="clean">{{ range .Warnings }}<li class="warning">[{{ .Severity }}] {{ .RuleID }}: {{ .Message }} {{ if .EventID }}<code>{{ .EventID }}</code>{{ end }} {{ if .Path }}<code>{{ .Path }}</code>{{ end }}</li>{{ end }}</ul>
+      {{ end }}
+    {{ else }}
+      <p class="muted">No check result available.</p>
+    {{ end }}
+  </section>
+
+  <section>
+    <h2>Changed Files</h2>
+    {{ if .Summary.ChangedFiles }}
+      <ul class="clean">{{ range .Summary.ChangedFiles }}<li><code>{{ . }}</code></li>{{ end }}</ul>
+    {{ else }}
+      <span class="muted">No changed files recorded.</span>
+    {{ end }}
+  </section>
+
+  <section>
+    <h2>Commands</h2>
+    {{ if .Summary.Commands }}
+      <table>
+        <thead><tr><th>Command</th><th>Tool</th><th>Exit</th><th>Event</th></tr></thead>
+        <tbody>{{ range .Summary.Commands }}<tr><td><code>{{ .Command }}</code></td><td>{{ .ToolName }}</td><td>{{ .ExitCode }}</td><td><code>{{ .EventID }}</code></td></tr>{{ end }}</tbody>
+      </table>
+    {{ else }}
+      <span class="muted">No commands recorded.</span>
+    {{ end }}
+  </section>
+
+  <section>
+    <h2>Timeline</h2>
+    {{ if .Timeline }}
+      <table>
+        <thead><tr><th>#</th><th>Time</th><th>Type</th><th>Title</th><th>Detail</th></tr></thead>
+        <tbody>{{ range .Timeline }}<tr><td>{{ .Index }}</td><td>{{ if .Time.IsZero }}-{{ else }}{{ .Time.Format "2006-01-02T15:04:05Z07:00" }}{{ end }}</td><td>{{ .Type }}</td><td>{{ .Title }}</td><td>{{ .Detail }}</td></tr>{{ end }}</tbody>
+      </table>
+    {{ else }}
+      <span class="muted">No timeline events recorded.</span>
+    {{ end }}
+  </section>
+
+  <section>
+    <h2>Final Diff</h2>
+    {{ if .FinalDiff }}<pre>{{ .FinalDiff }}</pre>{{ else }}<span class="muted">No patch artifacts found.</span>{{ end }}
+  </section>
+
+  <section>
+    <h2>Artifacts</h2>
+    {{ if .Artifacts }}
+      <table>
+        <thead><tr><th>Kind</th><th>Path</th><th>Size</th><th>MIME</th><th>Redacted</th></tr></thead>
+        <tbody>{{ range .Artifacts }}<tr><td>{{ .Kind }}</td><td><code>{{ .Path }}</code></td><td>{{ .SizeBytes }}</td><td>{{ .MimeType }}</td><td>{{ .Redacted }}</td></tr>{{ end }}</tbody>
+      </table>
+    {{ else }}
+      <span class="muted">No artifacts recorded.</span>
+    {{ end }}
+  </section>
+
+  <section>
+    <h2>Event Detail</h2>
+    {{ if .Events }}
+      {{ range .Events }}
+        <details>
+          <summary>#{{ .Index }} {{ .Type }} {{ .EventID }}</summary>
+          <table>
+            <tbody>
+              <tr><th>Time</th><td>{{ .Timestamp }}</td></tr>
+              <tr><th>Source</th><td>{{ .Source }}</td></tr>
+              {{ if .RawRef }}<tr><th>Raw Ref</th><td><code>{{ .RawRef }}</code></td></tr>{{ end }}
+            </tbody>
+          </table>
+          <pre>{{ .PayloadJSON }}</pre>
+          {{ if .Artifacts }}
+            <h3>Artifacts</h3>
+            <ul class="clean">{{ range .Artifacts }}<li>{{ .Kind }} <code>{{ .Path }}</code> {{ .SizeBytes }} bytes</li>{{ end }}</ul>
+          {{ end }}
+        </details>
+      {{ end }}
+    {{ else }}
+      <span class="muted">No events recorded.</span>
+    {{ end }}
+  </section>
+</main>
+</body>
+</html>

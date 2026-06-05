@@ -1,0 +1,14 @@
+{
+  "session_id": "agent-vcr-e2e-session",
+  "cwd": __CWD_JSON__,
+  "hook_event_name": "PostToolUse",
+  "turn_id": "turn-e2e",
+  "tool_name": "Bash",
+  "tool_use_id": "toolu-e2e-1",
+  "tool_response": {
+    "exit_code": 0,
+    "stdout": " M README.md\n",
+    "stderr": "",
+    "is_error": false
+  }
+}

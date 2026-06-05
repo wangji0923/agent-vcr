@@ -1,0 +1,10 @@
+diff --git a/internal/cli/list.go b/internal/cli/list.go
+--- a/internal/cli/list.go
++++ b/internal/cli/list.go
+@@
++list
+diff --git a/internal/cli/replay.go b/internal/cli/replay.go
+--- a/internal/cli/replay.go
++++ b/internal/cli/replay.go
+@@
++replay

@@ -1,0 +1,69 @@
+{
+  "schema_version": "0.1",
+  "run_id": "run_golden",
+  "source_trace_hash": "sha256:trace",
+  "generated_at": "2026-06-05T10:00:00Z",
+  "steps": [
+    {
+      "step_id": "behavior_step_0001",
+      "run_id": "run_golden",
+      "index": 0,
+      "kind": "search",
+      "summary": "search: session",
+      "query": "session",
+      "result": "success",
+      "fingerprint": "search|||session||||success",
+      "significant": true,
+      "source_event_ids": [
+        "evt_search"
+      ]
+    },
+    {
+      "step_id": "behavior_step_0002",
+      "run_id": "run_golden",
+      "index": 1,
+      "kind": "edit_file",
+      "summary": "edit: src/session.go",
+      "files": [
+        "src/session.go"
+      ],
+      "result": "success",
+      "fingerprint": "edit_file||||||src/session.go|success",
+      "significant": true,
+      "source_event_ids": [
+        "evt_patch"
+      ]
+    }
+  ],
+  "metrics": {
+    "context_discipline": {
+      "read_tests_before_edit": false,
+      "legacy_path_touched": false,
+      "unique_files_read": 0,
+      "repeated_reads": 0
+    },
+    "validation": {
+      "ran_tests_after_edit": false,
+      "ran_any_tests": false,
+      "failed_test_runs": 0,
+      "ignored_failed_command": false
+    },
+    "edit_scope": {
+      "files_edited": 0,
+      "source_files_edited": 0,
+      "test_files_edited": 0,
+      "source_to_test_edit_ratio": 0
+    },
+    "tool_efficiency": {
+      "total_steps": 2,
+      "tool_calls": 0,
+      "search_steps": 1,
+      "failed_commands": 0
+    },
+    "recovery": {
+      "recovered_after_failure": false,
+      "reran_tests_after_failure": false
+    }
+  },
+  "options": {}
+}

@@ -1,0 +1,12 @@
+{
+  "session_id": "s_1234567890abcdef",
+  "cwd": ".",
+  "hook_event_name": "PreToolUse",
+  "turn_id": "turn_1",
+  "tool_name": "Bash",
+  "tool_use_id": "toolu_1",
+  "tool_input": {
+    "command": "ls -la",
+    "description": "list files"
+  }
+}

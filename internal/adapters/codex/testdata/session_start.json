@@ -1,0 +1,8 @@
+{
+  "session_id": "s_1234567890abcdef",
+  "transcript_path": "C:\\Users\\example\\.codex\\sessions\\s_123.jsonl",
+  "cwd": ".",
+  "hook_event_name": "SessionStart",
+  "model": "gpt-5.5",
+  "permission_mode": "workspace-write"
+}

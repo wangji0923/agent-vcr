@@ -2,11 +2,13 @@
 /bin/
 /dist/
 /coverage/
+/agent-vcr.zip
 *.exe
 *.test
 *.out
 
 # Local environment
+.agent-vcr/
 .env
 .env.*
 !.env.example
@@ -17,5 +19,4 @@
 .DS_Store
 Thumbs.db
 
-# Local planning documents
-/docs/
+# Project documentation is tracked under docs/.

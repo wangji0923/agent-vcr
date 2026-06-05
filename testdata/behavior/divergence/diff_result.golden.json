@@ -1,0 +1,160 @@
+{
+  "run_a": "run-a",
+  "run_b": "run-b",
+  "first_divergence": {
+    "index": 1,
+    "kind": "step_changed",
+    "run_a_step": {
+      "step_id": "behavior_step_0002",
+      "run_id": "run-a",
+      "index": 1,
+      "kind": "inspect_test",
+      "action": "tests/auth/session.test.ts",
+      "summary": "read: tests/auth/session.test.ts",
+      "target": "tests/auth/session.test.ts",
+      "files": [
+        "tests/auth/session.test.ts"
+      ],
+      "result": "success",
+      "fingerprint": "inspect_test|tests/auth/session.test.ts|tests/auth/session.test.ts||||tests/auth/session.test.ts|success",
+      "significant": true,
+      "source_event_ids": [
+        "a2"
+      ]
+    },
+    "run_b_step": {
+      "step_id": "behavior_step_0002",
+      "run_id": "run-b",
+      "index": 1,
+      "kind": "read_file",
+      "action": "src/auth/legacy-cookie.ts",
+      "summary": "read: src/auth/legacy-cookie.ts",
+      "target": "src/auth/legacy-cookie.ts",
+      "files": [
+        "src/auth/legacy-cookie.ts"
+      ],
+      "result": "success",
+      "fingerprint": "read_file|src/auth/legacy-cookie.ts|src/auth/legacy-cookie.ts||||src/auth/legacy-cookie.ts|success",
+      "significant": true,
+      "source_event_ids": [
+        "b2"
+      ]
+    },
+    "summary": "file discovery divergence at step 2",
+    "explanation": "Run B entered a legacy path before Run A inspected tests.",
+    "related_event_ids": [
+      "a2",
+      "b2"
+    ]
+  },
+  "summary": {
+    "diverged": true,
+    "divergence_kind": "step_changed",
+    "common_prefix_steps": 1,
+    "step_count_a": 2,
+    "step_count_b": 2,
+    "message": "file discovery divergence at step 2"
+  },
+  "metrics_delta": {
+    "context_discipline": {
+      "legacy_path_touched": {
+        "before": false,
+        "after": true,
+        "changed": true
+      },
+      "read_tests_before_edit": {
+        "before": false,
+        "after": false,
+        "changed": false
+      },
+      "repeated_reads": {
+        "before": 0,
+        "after": 0,
+        "changed": false
+      },
+      "unique_files_read": {
+        "before": 1,
+        "after": 1,
+        "changed": false
+      }
+    },
+    "validation": {
+      "failed_test_runs": {
+        "before": 0,
+        "after": 0,
+        "changed": false
+      },
+      "ignored_failed_command": {
+        "before": false,
+        "after": false,
+        "changed": false
+      },
+      "ran_any_tests": {
+        "before": false,
+        "after": false,
+        "changed": false
+      },
+      "ran_tests_after_edit": {
+        "before": false,
+        "after": false,
+        "changed": false
+      }
+    },
+    "edit_scope": {
+      "files_edited": {
+        "before": 0,
+        "after": 0,
+        "changed": false
+      },
+      "source_files_edited": {
+        "before": 0,
+        "after": 0,
+        "changed": false
+      },
+      "source_to_test_edit_ratio": {
+        "before": 0,
+        "after": 0,
+        "changed": false
+      },
+      "test_files_edited": {
+        "before": 0,
+        "after": 0,
+        "changed": false
+      }
+    },
+    "tool_efficiency": {
+      "failed_commands": {
+        "before": 0,
+        "after": 0,
+        "changed": false
+      },
+      "search_steps": {
+        "before": 1,
+        "after": 1,
+        "changed": false
+      },
+      "tool_calls": {
+        "before": 0,
+        "after": 0,
+        "changed": false
+      },
+      "total_steps": {
+        "before": 2,
+        "after": 2,
+        "changed": false
+      }
+    },
+    "recovery": {
+      "recovered_after_failure": {
+        "before": false,
+        "after": false,
+        "changed": false
+      },
+      "reran_tests_after_failure": {
+        "before": false,
+        "after": false,
+        "changed": false
+      }
+    }
+  }
+}

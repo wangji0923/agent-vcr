@@ -1,0 +1,10 @@
+{
+  "session_id": "s_1234567890abcdef",
+  "cwd": ".",
+  "hook_event_name": "PermissionRequest",
+  "permission_mode": "on-request",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "git status"
+  }
+}
