@@ -20,6 +20,27 @@ Format Go files before sending changes:
 gofmt -w .
 ```
 
+## Contribution And Merge Policy
+
+Anyone may open a pull request. External contributors should use forks; write
+access is reserved for trusted maintainers.
+
+The `main` branch is protected:
+
+- changes must go through pull requests
+- CI must pass before merge
+- direct pushes to `main` are not allowed for normal development
+- force pushes and branch deletion are not allowed
+
+For the early project phase, maintainers merge PRs manually with squash merge.
+Merge commits and rebase merges are disabled to keep the public history easy to
+read. When the project has multiple active maintainers, required approvals and
+CODEOWNERS reviews can be tightened.
+
+Only maintainers may merge pull requests. Maintainer access should be granted
+slowly and only to contributors who repeatedly make well-scoped changes, follow
+the adapter boundaries, write tests, and review other pull requests carefully.
+
 ## Architecture Rules
 
 - Codex logic belongs in `internal/adapters/codex`.
