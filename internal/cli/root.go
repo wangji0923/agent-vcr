@@ -45,6 +45,7 @@ func NewRootCommand() *cobra.Command {
 		newReplayCommand(opts),
 		newDiffCommand(opts),
 		newBehaviorCommand(opts),
+		newVisualizeCommand(opts),
 		newCheckCommand(opts),
 		newExportCommand(opts),
 		newRedactCommand(opts),

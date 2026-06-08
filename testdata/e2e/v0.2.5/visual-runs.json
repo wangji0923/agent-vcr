@@ -1,0 +1,135 @@
+{
+  "schema_version": "0.2.5",
+  "description": "Behavior visualization E2E fixture runs. No real Codex session is required.",
+  "runs": [
+    {
+      "run_id": "visual-a-test-first",
+      "label": "test-first",
+      "source": "visualize-e2e",
+      "status": "completed",
+      "start_offset_seconds": 0,
+      "events": [
+        {
+          "type": "shell_command",
+          "command": "rg \"session\" src tests",
+          "tool_use_id": "a-search"
+        },
+        {
+          "type": "shell_result",
+          "command": "rg \"session\" src tests",
+          "tool_use_id": "a-search",
+          "exit_code": 0
+        },
+        {
+          "type": "file_read",
+          "target": "tests/auth/session.test.ts",
+          "files": ["tests/auth/session.test.ts"]
+        },
+        {
+          "type": "file_read",
+          "target": "src/auth/session.ts",
+          "files": ["src/auth/session.ts"]
+        },
+        {
+          "type": "file_patch",
+          "target": "src/auth/session.ts",
+          "files": ["src/auth/session.ts"]
+        },
+        {
+          "type": "shell_command",
+          "command": "npm test",
+          "tool_use_id": "a-test"
+        },
+        {
+          "type": "shell_result",
+          "command": "npm test",
+          "tool_use_id": "a-test",
+          "exit_code": 0
+        },
+        {
+          "type": "run_stop",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "run_id": "visual-b-legacy-no-test",
+      "label": "legacy-no-test",
+      "source": "visualize-e2e",
+      "status": "completed",
+      "start_offset_seconds": 60,
+      "events": [
+        {
+          "type": "shell_command",
+          "command": "rg \"cookie\" src",
+          "tool_use_id": "b-search"
+        },
+        {
+          "type": "shell_result",
+          "command": "rg \"cookie\" src",
+          "tool_use_id": "b-search",
+          "exit_code": 0
+        },
+        {
+          "type": "file_read",
+          "target": "src/auth/legacy-cookie.ts",
+          "files": ["src/auth/legacy-cookie.ts"]
+        },
+        {
+          "type": "file_patch",
+          "target": "src/auth/legacy-cookie.ts",
+          "files": ["src/auth/legacy-cookie.ts"]
+        },
+        {
+          "type": "run_stop",
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "run_id": "visual-c-source-first",
+      "label": "source-first-validated",
+      "source": "visualize-e2e",
+      "status": "completed",
+      "start_offset_seconds": 120,
+      "events": [
+        {
+          "type": "shell_command",
+          "command": "rg \"session\" src",
+          "tool_use_id": "c-search"
+        },
+        {
+          "type": "shell_result",
+          "command": "rg \"session\" src",
+          "tool_use_id": "c-search",
+          "exit_code": 0
+        },
+        {
+          "type": "file_read",
+          "target": "src/auth/session.ts",
+          "files": ["src/auth/session.ts"]
+        },
+        {
+          "type": "file_patch",
+          "target": "src/auth/session.ts",
+          "files": ["src/auth/session.ts"]
+        },
+        {
+          "type": "shell_command",
+          "command": "npm test",
+          "tool_use_id": "c-test"
+        },
+        {
+          "type": "shell_result",
+          "command": "npm test",
+          "tool_use_id": "c-test",
+          "exit_code": 0
+        },
+        {
+          "type": "run_stop",
+          "status": "success"
+        }
+      ]
+    }
+  ]
+}

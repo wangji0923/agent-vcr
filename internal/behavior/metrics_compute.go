@@ -143,10 +143,9 @@ func (c *metricsCalculator) observeEdit(index int, step Step) {
 	for _, file := range metricsNormalizedNonEmpty(stepPaths(step)) {
 		c.editedFiles[file] = true
 		pathKind := c.pathKind(file)
-		switch pathKind {
-		case PathTest:
+		if pathKind == PathTest {
 			c.testEdits[file] = true
-		case PathSource:
+		} else if pathKind == PathSource || c.pathHasAttribute(file, "is_source") {
 			c.sourceEdits[file] = true
 		}
 		dir := metricsTopLevelDirectory(file)
@@ -229,17 +228,41 @@ func (c *metricsCalculator) pathsHaveKind(paths []string, kind PathKind) bool {
 }
 
 func (c *metricsCalculator) pathKind(path string) PathKind {
+	classification := c.pathClassification(path)
+	if classification.Kind != "" && classification.Kind != PathUnknown {
+		return classification.Kind
+	}
+	return PathUnknown
+}
+
+func (c *metricsCalculator) pathHasAttribute(path string, attribute string) bool {
+	classification := c.pathClassification(path)
+	if classification.Attributes != nil && classification.Attributes[attribute] == "true" {
+		return true
+	}
 	normalized := NormalizePathForKey(path)
 	if normalized == "" {
-		return PathUnknown
+		return false
+	}
+	return ClassifyPath(normalized).Attributes[attribute] == "true"
+}
+
+func (c *metricsCalculator) pathClassification(path string) PathClassification {
+	normalized := NormalizePathForKey(path)
+	if normalized == "" {
+		return PathClassification{Kind: PathUnknown}
 	}
 	if c.options.PathClassifier != nil {
 		classification := c.options.PathClassifier.ClassifyPath(normalized)
 		if classification.Kind != "" && classification.Kind != PathUnknown {
-			return classification.Kind
+			return classification
 		}
 	}
-	return metricsFallbackPathKind(normalized)
+	classification := ClassifyPath(normalized)
+	if classification.Kind != "" && classification.Kind != PathUnknown {
+		return classification
+	}
+	return PathClassification{Kind: metricsFallbackPathKind(normalized), Path: normalized}
 }
 
 func isMetricsReadStep(step Step) bool {

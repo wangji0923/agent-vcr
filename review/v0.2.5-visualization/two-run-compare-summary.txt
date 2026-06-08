@@ -1,0 +1,10 @@
+﻿Behavior visualization: compare
+Runs: 2
+- visual-a-test-first (visual-a-test-first): 5 steps, status=completed
+- visual-b-legacy-no-test (visual-b-legacy-no-test): 3 steps, status=completed
+Steps: 8 total, 8 significant
+First divergence: step 1, visual-a-test-first -> visual-b-legacy-no-test, kind=step_changed
+Divergence summary: search query divergence at step 1
+Alignment rows: 5
+File access rows: 3
+Metrics cards: 44

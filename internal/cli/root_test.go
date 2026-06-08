@@ -88,6 +88,7 @@ func TestRegisteredCommands(t *testing.T) {
 		"replay",
 		"diff",
 		"behavior",
+		"visualize",
 		"check",
 		"export",
 		"redact",
