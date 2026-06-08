@@ -17,7 +17,7 @@ func TestGitutilRepoSnapshot(t *testing.T) {
 	if err != nil {
 		t.Fatalf("FindRepoRoot: %v", err)
 	}
-	if filepath.Clean(root) != filepath.Clean(repo) {
+	if !samePath(root, repo) {
 		t.Fatalf("root = %q, want %q", root, repo)
 	}
 	head, err := CurrentHead(repo)
@@ -139,4 +139,13 @@ func contains(values []string, want string) bool {
 		}
 	}
 	return false
+}
+
+func samePath(a, b string) bool {
+	aInfo, aErr := os.Stat(filepath.Clean(a))
+	bInfo, bErr := os.Stat(filepath.Clean(b))
+	if aErr == nil && bErr == nil {
+		return os.SameFile(aInfo, bInfo)
+	}
+	return filepath.Clean(a) == filepath.Clean(b)
 }
