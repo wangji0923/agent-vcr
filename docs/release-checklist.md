@@ -1,6 +1,6 @@
-# v0.2 Release Checklist
+# v0.2 / v0.2.5 Release Checklist
 
-Use this before tagging a v0.2 release.
+Use this before tagging a v0.2 or v0.2.5 release.
 
 ## Local Verification
 
@@ -10,7 +10,9 @@ go vet ./...
 go build ./cmd/agent-vcr
 go run ./cmd/agent-vcr --help
 go run ./cmd/agent-vcr behavior --help
+go run ./cmd/agent-vcr visualize --help
 powershell -ExecutionPolicy Bypass -File ./scripts/e2e.ps1
+powershell -ExecutionPolicy Bypass -File ./scripts/e2e-v0.2.5.ps1
 ```
 
 Also run the report/export path when the report module is present:
@@ -42,6 +44,27 @@ go run ./cmd/agent-vcr doctor
 - E2E fixtures create two behavior runs and verify behavior latest, diff, and
   metrics.
 
+## Behavior Visualization v0.2.5
+
+- `agent-vcr visualize latest --json` works.
+- `agent-vcr visualize latest --html` works.
+- Single-run visualize includes a behavior lane, file access data, and metrics
+  cards.
+- Two-run visualize shows swimlane comparison.
+- Two-run visualize highlights first divergence.
+- Multi-run visualize supports at least 3 lanes.
+- Multi-run visualize remains a lane comparison, not Matrix Compare.
+- File access compare is present in JSON and HTML output.
+- Metrics cards are present in JSON and HTML output.
+- HTML escaping tests pass.
+- Redacted output does not expose prompts, secrets, or raw tool output.
+- E2E fixtures do not depend on a real Codex session.
+- No HarnessMetadata, HarnessDiff, Matrix Compare, Regression/baseline, new
+  adapter, LLM Explain, deterministic replay, or cloud dashboard is implemented
+  as part of v0.2.5.
+- Documentation states that v0.3 is where HarnessMetadata and pairwise
+  HarnessDiff are planned.
+
 ## Documentation
 
 - README first screen positions the project as a Behavior Diff / Harness Diff
@@ -55,6 +78,10 @@ go run ./cmd/agent-vcr doctor
 - v0.5 roadmap is Capture Completeness + selected adapters / SDK.
 - Docs do not claim Matrix Compare is implemented.
 - Docs do not claim Regression/baseline is implemented.
+- Docs explain v0.2.5 Behavior Visualization and its scope boundary.
+- Docs do not claim v0.2.5 implements HarnessMetadata, HarnessDiff, Matrix
+  Compare, Regression/baseline, LLM Explain, deterministic replay, or a cloud
+  dashboard.
 - README install and quick start commands match the CLI.
 - Codex hook setup is documented.
 - Generic CLI wrapper usage is documented.
@@ -81,6 +108,8 @@ go run ./cmd/agent-vcr doctor
 - No HarnessDiff implementation claim.
 - No Matrix Compare implementation claim.
 - No Regression/baseline implementation claim.
+- No v0.2.5 HarnessMetadata claim.
+- No v0.2.5 Matrix or Regression claim.
 - No claim that every agent has deep first-party support.
 - No claim that hidden/private model reasoning is recorded.
 - Docs do not present LLM explain as core.

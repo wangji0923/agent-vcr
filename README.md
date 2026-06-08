@@ -56,6 +56,8 @@ agent-vcr replay latest
 agent-vcr diff <run-a> <run-b>
 agent-vcr behavior latest
 agent-vcr behavior diff <run-a> <run-b>
+agent-vcr visualize latest --json
+agent-vcr visualize <run-a> <run-b> --html --output compare.html
 agent-vcr check latest
 ```
 
@@ -118,6 +120,12 @@ agent-vcr behavior diff <run-a> <run-b>
 agent-vcr behavior diff <run-a> <run-b> --json
 agent-vcr behavior metrics latest
 
+agent-vcr visualize latest --json
+agent-vcr visualize latest --html --output behavior.html
+agent-vcr visualize <run-a> <run-b> --json
+agent-vcr visualize <run-a> <run-b> --html --output compare.html
+agent-vcr visualize <run-a> <run-b> <run-c> --html --output multi.html
+
 agent-vcr check latest
 agent-vcr check latest --ci
 agent-vcr check latest --json
@@ -151,6 +159,41 @@ agent-vcr behavior diff <run-a> <run-b> --json
 `agent-vcr diff` remains the v0.1 event-level diff. `agent-vcr behavior diff`
 is the v0.2 behavior-level diff based on BehaviorSignature and first behavior
 divergence.
+
+## Visualizing Behavior Paths
+
+v0.2.5 visualizes behavior data produced by v0.2. It turns behavior timelines,
+first divergence, file access, and metrics into static JSON or HTML artifacts.
+
+Use it for:
+
+- single-run behavior visualization
+- two-run swimlane comparison
+- small multi-run lane comparison for user-selected runs, usually 3-5 lanes
+- first divergence highlighting
+- file access comparison across runs
+- search scope comparison across runs
+- metric cards for context discipline, validation behavior, edit scope, tool
+  efficiency, and recovery behavior
+
+Example commands:
+
+```bash
+agent-vcr visualize latest --json
+agent-vcr visualize latest --html --output behavior.html
+agent-vcr visualize run-a run-b --json
+agent-vcr visualize run-a run-b --html --output compare.html
+agent-vcr visualize run-a run-b run-c --html --output multi.html
+```
+
+v0.2.5 does not add HarnessMetadata, HarnessDiff, Matrix Compare,
+Regression/baseline, LLM explanations, deterministic replay, new adapters, or a
+cloud dashboard. v0.3 is where HarnessMetadata and pairwise HarnessDiff are
+planned.
+
+In the HTML report, Swimlane Timeline is the source of truth for behavior-path
+comparison. Path Graph is an auxiliary compact overview, and search scopes such
+as `src` or `tests` are shown separately from file read/edit access.
 
 ## Adapter Architecture
 
@@ -202,6 +245,8 @@ agent surface does not expose.
 - v0.1 is the Behavior Diff trace foundation.
 - v0.2 adds BehaviorSignature, behavior timelines, first behavior divergence,
   and behavior metrics.
+- v0.2.5 adds Behavior Visualization for single-run, two-run, and small
+  multi-run inspection over v0.2 behavior data.
 - Codex hooks are the first native adapter.
 - Codex `exec --json` is supported as a structured stream adapter.
 - Generic CLI wrapper support is process-level and agent-agnostic.
@@ -247,6 +292,33 @@ agent-vcr behavior latest
 agent-vcr behavior diff run-a run-b
 agent-vcr behavior metrics latest
 ```
+
+### v0.2.5: Behavior Visualization
+
+Available in v0.2.5:
+
+- `VisualReport` JSON output
+- single-run behavior visualization
+- two-run swimlane comparison
+- small multi-run lane comparison
+- first divergence visual highlight
+- file access comparison
+- search scope comparison
+- metrics cards
+- static offline HTML output
+
+Commands:
+
+```bash
+agent-vcr visualize latest --json
+agent-vcr visualize latest --html --output behavior.html
+agent-vcr visualize run-a run-b --html --output compare.html
+agent-vcr visualize run-a run-b run-c --json
+```
+
+Not in v0.2.5: HarnessMetadata, HarnessDiff, Matrix Compare,
+Regression/baseline, new adapters, SDKs, LLM explanations, deterministic
+replay, or a cloud dashboard.
 
 ### v0.3: HarnessMetadata + Pairwise HarnessDiff
 

@@ -1,0 +1,61 @@
+{
+  "rows": [
+    {
+      "path": "src/legacy/session.go",
+      "runs": {
+        "run-a": {
+          "read_count": 0,
+          "edit_count": 0,
+          "first_step": 0,
+          "last_step": 0
+        },
+        "run-b": {
+          "read_count": 1,
+          "edit_count": 0,
+          "first_step": 1,
+          "last_step": 1,
+          "first_action": "read",
+          "last_action": "read"
+        }
+      }
+    },
+    {
+      "path": "src/session.go",
+      "runs": {
+        "run-a": {
+          "read_count": 1,
+          "edit_count": 2,
+          "first_step": 1,
+          "last_step": 3,
+          "first_action": "read",
+          "last_action": "edit"
+        },
+        "run-b": {
+          "read_count": 0,
+          "edit_count": 0,
+          "first_step": 0,
+          "last_step": 0
+        }
+      }
+    },
+    {
+      "path": "tests/session_test.go",
+      "runs": {
+        "run-a": {
+          "read_count": 1,
+          "edit_count": 0,
+          "first_step": 4,
+          "last_step": 4,
+          "first_action": "read",
+          "last_action": "read"
+        },
+        "run-b": {
+          "read_count": 0,
+          "edit_count": 0,
+          "first_step": 0,
+          "last_step": 0
+        }
+      }
+    }
+  ]
+}

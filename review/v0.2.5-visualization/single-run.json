@@ -1,0 +1,629 @@
+﻿{
+  "schema_version": "0.2.5",
+  "generated_at": "2026-06-08T10:53:07.2976123Z",
+  "mode": "single",
+  "options": {
+    "mode": "single",
+    "baseline_run_id": "visual-a-test-first",
+    "max_runs": 5
+  },
+  "summary": {
+    "run_count": 1,
+    "step_count": 5,
+    "significant_step_count": 5,
+    "divergence_count": 0,
+    "file_count": 2,
+    "metrics_card_count": 22,
+    "mode": "single"
+  },
+  "runs": [
+    {
+      "run_id": "visual-a-test-first",
+      "label": "visual-a-test-first",
+      "source": "visualize-e2e",
+      "status": "completed",
+      "started_at": "2026-06-08T11:02:59.1969341Z",
+      "ended_at": "2026-06-08T11:03:08.1969341Z",
+      "step_count": 5,
+      "summary": {
+        "cache_hit": true,
+        "source_trace_hash": "sha256:739eb377fe750938222ce59198b90b956fe85715c79cc9aaa9a8642302447545",
+        "total_steps": 6
+      }
+    }
+  ],
+  "lanes": [
+    {
+      "run_id": "visual-a-test-first",
+      "label": "visual-a-test-first",
+      "steps": [
+        {
+          "run_id": "visual-a-test-first",
+          "step_id": "behavior_step_0001",
+          "index": 1,
+          "kind": "search",
+          "phase": "discovery",
+          "summary": "search rg \"session\" src tests",
+          "query": "session",
+          "command": "rg \"session\" src tests",
+          "files": [
+            "src",
+            "tests"
+          ],
+          "event_ids": [
+            "evt-visual-a-test-first-1",
+            "evt-visual-a-test-first-2"
+          ],
+          "significant": true,
+          "divergent": false,
+          "attributes": {
+            "classifier": "default",
+            "command_kind": "search",
+            "correlation_id": "a-search",
+            "exit_code": "0",
+            "fingerprint": "search|rg \"session\" src tests||session|rg \"session\" src tests|shell|src,tests|success",
+            "raw_event_type": "shell_command",
+            "result": "success",
+            "source_adapter": "visualize-e2e",
+            "source_event_type": "shell_command",
+            "tool": "rg",
+            "tool_name": "shell"
+          }
+        },
+        {
+          "run_id": "visual-a-test-first",
+          "step_id": "behavior_step_0002",
+          "index": 2,
+          "kind": "inspect_test",
+          "phase": "inspection",
+          "summary": "inspect_test tests/auth/session.test.ts",
+          "files": [
+            "tests/auth/session.test.ts"
+          ],
+          "target": "tests/auth/session.test.ts",
+          "event_ids": [
+            "evt-visual-a-test-first-3"
+          ],
+          "significant": true,
+          "divergent": false,
+          "attributes": {
+            "fingerprint": "inspect_test|tests/auth/session.test.ts|tests/auth/session.test.ts||||tests/auth/session.test.ts|unknown",
+            "raw_event_type": "file_read",
+            "source_adapter": "visualize-e2e",
+            "source_event_type": "file_read"
+          }
+        },
+        {
+          "run_id": "visual-a-test-first",
+          "step_id": "behavior_step_0003",
+          "index": 3,
+          "kind": "read_file",
+          "phase": "inspection",
+          "summary": "read_file src/auth/session.ts",
+          "files": [
+            "src/auth/session.ts"
+          ],
+          "target": "src/auth/session.ts",
+          "event_ids": [
+            "evt-visual-a-test-first-4"
+          ],
+          "significant": true,
+          "divergent": false,
+          "attributes": {
+            "fingerprint": "read_file|src/auth/session.ts|src/auth/session.ts||||src/auth/session.ts|unknown",
+            "raw_event_type": "file_read",
+            "source_adapter": "visualize-e2e",
+            "source_event_type": "file_read"
+          }
+        },
+        {
+          "run_id": "visual-a-test-first",
+          "step_id": "behavior_step_0004",
+          "index": 4,
+          "kind": "edit_file",
+          "phase": "editing",
+          "summary": "edit_file src/auth/session.ts",
+          "files": [
+            "src/auth/session.ts"
+          ],
+          "target": "src/auth/session.ts",
+          "event_ids": [
+            "evt-visual-a-test-first-5"
+          ],
+          "significant": true,
+          "divergent": false,
+          "attributes": {
+            "fingerprint": "edit_file|src/auth/session.ts|src/auth/session.ts||||src/auth/session.ts|unknown",
+            "raw_event_type": "file_patch",
+            "source_adapter": "visualize-e2e",
+            "source_event_type": "file_patch"
+          }
+        },
+        {
+          "run_id": "visual-a-test-first",
+          "step_id": "behavior_step_0005",
+          "index": 5,
+          "kind": "run_test",
+          "phase": "validation",
+          "summary": "run_test npm test",
+          "command": "npm test",
+          "event_ids": [
+            "evt-visual-a-test-first-6",
+            "evt-visual-a-test-first-7"
+          ],
+          "significant": true,
+          "divergent": false,
+          "attributes": {
+            "classifier": "default",
+            "command_kind": "run_test",
+            "correlation_id": "a-test",
+            "exit_code": "0",
+            "fingerprint": "run_test|npm test|||npm test|shell||success",
+            "raw_event_type": "shell_command",
+            "result": "success",
+            "source_adapter": "visualize-e2e",
+            "source_event_type": "shell_command",
+            "tool": "npm",
+            "tool_name": "shell"
+          }
+        }
+      ]
+    }
+  ],
+  "alignment": [
+    {
+      "row_index": 1,
+      "cells": {
+        "visual-a-test-first": {
+          "run_id": "visual-a-test-first",
+          "step": {
+            "run_id": "visual-a-test-first",
+            "step_id": "behavior_step_0001",
+            "index": 1,
+            "kind": "search",
+            "phase": "discovery",
+            "summary": "search rg \"session\" src tests",
+            "query": "session",
+            "command": "rg \"session\" src tests",
+            "files": [
+              "src",
+              "tests"
+            ],
+            "event_ids": [
+              "evt-visual-a-test-first-1",
+              "evt-visual-a-test-first-2"
+            ],
+            "significant": true,
+            "divergent": false,
+            "attributes": {
+              "classifier": "default",
+              "command_kind": "search",
+              "correlation_id": "a-search",
+              "exit_code": "0",
+              "fingerprint": "search|rg \"session\" src tests||session|rg \"session\" src tests|shell|src,tests|success",
+              "raw_event_type": "shell_command",
+              "result": "success",
+              "source_adapter": "visualize-e2e",
+              "source_event_type": "shell_command",
+              "tool": "rg",
+              "tool_name": "shell"
+            }
+          },
+          "gap": false
+        }
+      },
+      "is_divergent": false
+    },
+    {
+      "row_index": 2,
+      "cells": {
+        "visual-a-test-first": {
+          "run_id": "visual-a-test-first",
+          "step": {
+            "run_id": "visual-a-test-first",
+            "step_id": "behavior_step_0002",
+            "index": 2,
+            "kind": "inspect_test",
+            "phase": "inspection",
+            "summary": "inspect_test tests/auth/session.test.ts",
+            "files": [
+              "tests/auth/session.test.ts"
+            ],
+            "target": "tests/auth/session.test.ts",
+            "event_ids": [
+              "evt-visual-a-test-first-3"
+            ],
+            "significant": true,
+            "divergent": false,
+            "attributes": {
+              "fingerprint": "inspect_test|tests/auth/session.test.ts|tests/auth/session.test.ts||||tests/auth/session.test.ts|unknown",
+              "raw_event_type": "file_read",
+              "source_adapter": "visualize-e2e",
+              "source_event_type": "file_read"
+            }
+          },
+          "gap": false
+        }
+      },
+      "is_divergent": false
+    },
+    {
+      "row_index": 3,
+      "cells": {
+        "visual-a-test-first": {
+          "run_id": "visual-a-test-first",
+          "step": {
+            "run_id": "visual-a-test-first",
+            "step_id": "behavior_step_0003",
+            "index": 3,
+            "kind": "read_file",
+            "phase": "inspection",
+            "summary": "read_file src/auth/session.ts",
+            "files": [
+              "src/auth/session.ts"
+            ],
+            "target": "src/auth/session.ts",
+            "event_ids": [
+              "evt-visual-a-test-first-4"
+            ],
+            "significant": true,
+            "divergent": false,
+            "attributes": {
+              "fingerprint": "read_file|src/auth/session.ts|src/auth/session.ts||||src/auth/session.ts|unknown",
+              "raw_event_type": "file_read",
+              "source_adapter": "visualize-e2e",
+              "source_event_type": "file_read"
+            }
+          },
+          "gap": false
+        }
+      },
+      "is_divergent": false
+    },
+    {
+      "row_index": 4,
+      "cells": {
+        "visual-a-test-first": {
+          "run_id": "visual-a-test-first",
+          "step": {
+            "run_id": "visual-a-test-first",
+            "step_id": "behavior_step_0004",
+            "index": 4,
+            "kind": "edit_file",
+            "phase": "editing",
+            "summary": "edit_file src/auth/session.ts",
+            "files": [
+              "src/auth/session.ts"
+            ],
+            "target": "src/auth/session.ts",
+            "event_ids": [
+              "evt-visual-a-test-first-5"
+            ],
+            "significant": true,
+            "divergent": false,
+            "attributes": {
+              "fingerprint": "edit_file|src/auth/session.ts|src/auth/session.ts||||src/auth/session.ts|unknown",
+              "raw_event_type": "file_patch",
+              "source_adapter": "visualize-e2e",
+              "source_event_type": "file_patch"
+            }
+          },
+          "gap": false
+        }
+      },
+      "is_divergent": false
+    },
+    {
+      "row_index": 5,
+      "cells": {
+        "visual-a-test-first": {
+          "run_id": "visual-a-test-first",
+          "step": {
+            "run_id": "visual-a-test-first",
+            "step_id": "behavior_step_0005",
+            "index": 5,
+            "kind": "run_test",
+            "phase": "validation",
+            "summary": "run_test npm test",
+            "command": "npm test",
+            "event_ids": [
+              "evt-visual-a-test-first-6",
+              "evt-visual-a-test-first-7"
+            ],
+            "significant": true,
+            "divergent": false,
+            "attributes": {
+              "classifier": "default",
+              "command_kind": "run_test",
+              "correlation_id": "a-test",
+              "exit_code": "0",
+              "fingerprint": "run_test|npm test|||npm test|shell||success",
+              "raw_event_type": "shell_command",
+              "result": "success",
+              "source_adapter": "visualize-e2e",
+              "source_event_type": "shell_command",
+              "tool": "npm",
+              "tool_name": "shell"
+            }
+          },
+          "gap": false
+        }
+      },
+      "is_divergent": false
+    }
+  ],
+  "file_access": {
+    "rows": [
+      {
+        "path": "src/auth/session.ts",
+        "runs": {
+          "visual-a-test-first": {
+            "read_count": 1,
+            "edit_count": 1,
+            "first_step": 3,
+            "last_step": 4,
+            "first_action": "read",
+            "last_action": "edit"
+          }
+        }
+      },
+      {
+        "path": "tests/auth/session.test.ts",
+        "runs": {
+          "visual-a-test-first": {
+            "read_count": 1,
+            "edit_count": 0,
+            "first_step": 2,
+            "last_step": 2,
+            "first_action": "read",
+            "last_action": "read"
+          }
+        }
+      }
+    ]
+  },
+  "search_scopes": {
+    "rows": [
+      {
+        "scope": "src",
+        "runs": {
+          "visual-a-test-first": {
+            "search_count": 1,
+            "first_step": 1,
+            "last_step": 1,
+            "queries": [
+              "session"
+            ]
+          }
+        }
+      },
+      {
+        "scope": "tests",
+        "runs": {
+          "visual-a-test-first": {
+            "search_count": 1,
+            "first_step": 1,
+            "last_step": 1,
+            "queries": [
+              "session"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "metrics": [
+    {
+      "run_id": "visual-a-test-first",
+      "label": "visual-a-test-first",
+      "cards": [
+        {
+          "group": "Context discipline",
+          "name": "Read tests before edit",
+          "value": "yes",
+          "level": "good"
+        },
+        {
+          "group": "Context discipline",
+          "name": "Legacy path touched",
+          "value": "no",
+          "level": "good"
+        },
+        {
+          "group": "Context discipline",
+          "name": "Files read",
+          "value": "2",
+          "level": "info"
+        },
+        {
+          "group": "Context discipline",
+          "name": "Repeated reads",
+          "value": "0",
+          "level": "good"
+        },
+        {
+          "group": "Validation behavior",
+          "name": "Ran tests after edit",
+          "value": "yes",
+          "level": "good"
+        },
+        {
+          "group": "Validation behavior",
+          "name": "Ran any tests",
+          "value": "yes",
+          "level": "good"
+        },
+        {
+          "group": "Validation behavior",
+          "name": "Failed test runs",
+          "value": "0",
+          "level": "good"
+        },
+        {
+          "group": "Validation behavior",
+          "name": "Skipped validation",
+          "value": "no",
+          "level": "good"
+        },
+        {
+          "group": "Validation behavior",
+          "name": "Ignored failed command",
+          "value": "no",
+          "level": "good"
+        },
+        {
+          "group": "Edit scope",
+          "name": "Files edited",
+          "value": "1",
+          "level": "info"
+        },
+        {
+          "group": "Edit scope",
+          "name": "Source files edited",
+          "value": "1",
+          "level": "info"
+        },
+        {
+          "group": "Edit scope",
+          "name": "Test files edited",
+          "value": "0",
+          "level": "info"
+        },
+        {
+          "group": "Edit scope",
+          "name": "Source/test edit ratio",
+          "value": "1.00",
+          "level": "warn"
+        },
+        {
+          "group": "Tool efficiency",
+          "name": "Tool calls",
+          "value": "2",
+          "level": "info"
+        },
+        {
+          "group": "Tool efficiency",
+          "name": "Shell commands",
+          "value": "unavailable",
+          "level": "info"
+        },
+        {
+          "group": "Tool efficiency",
+          "name": "Search steps",
+          "value": "1",
+          "level": "info"
+        },
+        {
+          "group": "Tool efficiency",
+          "name": "Total steps",
+          "value": "6",
+          "level": "info"
+        },
+        {
+          "group": "Tool efficiency",
+          "name": "Failed commands",
+          "value": "0",
+          "level": "good"
+        },
+        {
+          "group": "Tool efficiency",
+          "name": "Repeated commands",
+          "value": "unavailable",
+          "level": "info"
+        },
+        {
+          "group": "Recovery behavior",
+          "name": "Recovered after failure",
+          "value": "no",
+          "level": "info"
+        },
+        {
+          "group": "Recovery behavior",
+          "name": "Reran tests after failure",
+          "value": "no",
+          "level": "info"
+        },
+        {
+          "group": "Recovery behavior",
+          "name": "Repeated failures",
+          "value": "no",
+          "level": "good"
+        }
+      ]
+    }
+  ],
+  "path_graph": {
+    "nodes": [
+      {
+        "id": "step-ad57d457101a",
+        "label": "search rg \"session\" src tests",
+        "kind": "search",
+        "run_ids": [
+          "visual-a-test-first"
+        ]
+      },
+      {
+        "id": "step-87206cf8a3cc",
+        "label": "inspect_test tests/auth/session.test.ts",
+        "kind": "inspect_test",
+        "run_ids": [
+          "visual-a-test-first"
+        ]
+      },
+      {
+        "id": "step-964f091e5822",
+        "label": "read_file src/auth/session.ts",
+        "kind": "read_file",
+        "run_ids": [
+          "visual-a-test-first"
+        ]
+      },
+      {
+        "id": "step-992d7ea5036e",
+        "label": "edit_file src/auth/session.ts",
+        "kind": "edit_file",
+        "run_ids": [
+          "visual-a-test-first"
+        ]
+      },
+      {
+        "id": "step-74cc6c8ca7a0",
+        "label": "run_test npm test",
+        "kind": "run_test",
+        "run_ids": [
+          "visual-a-test-first"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from": "step-ad57d457101a",
+        "to": "step-87206cf8a3cc",
+        "run_ids": [
+          "visual-a-test-first"
+        ]
+      },
+      {
+        "from": "step-87206cf8a3cc",
+        "to": "step-964f091e5822",
+        "run_ids": [
+          "visual-a-test-first"
+        ]
+      },
+      {
+        "from": "step-964f091e5822",
+        "to": "step-992d7ea5036e",
+        "run_ids": [
+          "visual-a-test-first"
+        ]
+      },
+      {
+        "from": "step-992d7ea5036e",
+        "to": "step-74cc6c8ca7a0",
+        "run_ids": [
+          "visual-a-test-first"
+        ]
+      }
+    ]
+  }
+}

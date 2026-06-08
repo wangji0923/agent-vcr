@@ -73,3 +73,9 @@ jobs:
         run: |
           $exe = if ($IsWindows) { "bin/agent-vcr.exe" } else { "bin/agent-vcr" }
           ./scripts/e2e.ps1 -AgentVCR $exe
+
+      - name: v0.2.5 visualization E2E fixtures
+        shell: pwsh
+        run: |
+          $exe = if ($IsWindows) { "bin/agent-vcr.exe" } else { "bin/agent-vcr" }
+          ./scripts/e2e-v0.2.5.ps1 -AgentVCR $exe

@@ -49,6 +49,9 @@ func TestMetricsSkipValidationWhenSourceEditedWithoutTests(t *testing.T) {
 	if report.Metrics.Validation.RanAnyTests {
 		t.Fatalf("did not expect tests")
 	}
+	if report.Metrics.EditScope.SourceFilesEdited != 1 {
+		t.Fatalf("source files edited = %d, want 1 for legacy source file", report.Metrics.EditScope.SourceFilesEdited)
+	}
 	if !report.Facts.SkipValidation {
 		t.Fatalf("expected source edit without tests to count as skip validation")
 	}

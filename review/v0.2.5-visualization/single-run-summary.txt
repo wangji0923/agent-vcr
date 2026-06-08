@@ -1,0 +1,7 @@
+﻿Behavior visualization: single
+Runs: 1
+- visual-a-test-first (visual-a-test-first): 5 steps, status=completed
+Steps: 5 total, 5 significant
+Alignment rows: 5
+File access rows: 2
+Metrics cards: 22

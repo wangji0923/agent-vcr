@@ -31,6 +31,20 @@ before importing the v0.2 planning package.
 - `v0.2-实施方案.md`
 - `modules/`
 
+## v0.2.5 Planning Docs
+
+`docs/v0.2.5/` contains the imported v0.2.5 documentation package for
+Behavior Visualization:
+
+- `README.md`
+- `v0.2.5-技术方案.md`
+- `v0.2.5-实施方案.md`
+- `modules/`
+
+The v0.2.5 package is documentation only at this stage. It should not be
+treated as implemented behavior until the corresponding visualization modules
+are developed and validated.
+
 ## v0.3 Planning Docs
 
 `docs/v0.3/` contains the imported v0.3 documentation package:

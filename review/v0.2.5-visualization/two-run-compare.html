@@ -1,0 +1,1433 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>agent-vcr Behavior Visualization</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --ink: #19212a;
+      --muted: #657282;
+      --line: #d9dee7;
+      --soft: #edf1f6;
+      --accent: #0f766e;
+      --accent-soft: #dff7f3;
+      --warn: #b45309;
+      --warn-soft: #fff3d6;
+      --bad: #b42318;
+      --bad-soft: #ffe4e1;
+      --good: #047857;
+      --good-soft: #ddf6e8;
+      --code: #111827;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1, h2, h3 {
+      margin: 0;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+    h1 { font-size: 28px; }
+    h2 { font-size: 18px; margin-bottom: 14px; }
+    h3 { font-size: 14px; margin-bottom: 10px; }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    code {
+      color: var(--code);
+      overflow-wrap: anywhere;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 26px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--soft);
+      padding: 2px 9px;
+      white-space: nowrap;
+    }
+    .section {
+      margin-top: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 18px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }
+    .summary-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfe;
+    }
+    .summary-item .value {
+      display: block;
+      font-size: 24px;
+      font-weight: 650;
+    }
+    .summary-item .label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .runs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+    .run-card, .metric-card, .step-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      padding: 12px;
+    }
+    .run-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .run-label {
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+    .run-id, .small {
+      color: var(--muted);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+    dl {
+      display: grid;
+      grid-template-columns: minmax(90px, max-content) 1fr;
+      gap: 6px 10px;
+      margin: 10px 0 0;
+      font-size: 13px;
+    }
+    dt { color: var(--muted); }
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+    .divergence {
+      border-color: #f2c94c;
+      background: var(--warn-soft);
+    }
+    .divergence .summary {
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+    .warnings {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--warn);
+    }
+    .scroll {
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f4f6f9;
+      color: #344054;
+      font-weight: 650;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tr.row-divergent td {
+      background: var(--warn-soft);
+      border-top: 2px solid #f2c94c;
+      border-bottom: 2px solid #f2c94c;
+    }
+    .gap {
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    .step-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--soft);
+      color: #344054;
+      white-space: nowrap;
+    }
+    .kind-search, .kind-read-file, .kind-inspect-test { background: #e8f1ff; color: #175cd3; }
+    .kind-edit-file, .kind-install-dependency { background: #fff0e5; color: #b54708; }
+    .kind-run-test, .kind-run-build, .kind-skip-validation { background: var(--good-soft); color: var(--good); }
+    .kind-recover-from-error { background: #f4e8ff; color: #6941c6; }
+    .step-summary {
+      overflow-wrap: anywhere;
+      font-weight: 600;
+    }
+    .step-card.divergent-step {
+      border-color: #f2c94c;
+      background: #fffaf0;
+    }
+    details {
+      margin-top: 8px;
+    }
+    summary {
+      cursor: pointer;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .details-box {
+      margin-top: 8px;
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+    }
+    .lane-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 10px;
+    }
+    .lane-stack {
+      display: grid;
+      gap: 8px;
+    }
+    .file-path {
+      overflow-wrap: anywhere;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    .file-use {
+      display: grid;
+      gap: 3px;
+    }
+    .level-good { background: var(--good-soft); color: var(--good); }
+    .level-warn { background: var(--warn-soft); color: var(--warn); }
+    .level-bad { background: var(--bad-soft); color: var(--bad); }
+    .level-info, .level-neutral { background: var(--soft); color: #344054; }
+    .level-muted { color: var(--muted); }
+    .metric-groups {
+      display: grid;
+      gap: 14px;
+    }
+    .metric-row {
+      display: grid;
+      grid-template-columns: minmax(170px, 240px) 1fr;
+      gap: 10px;
+      align-items: stretch;
+      margin-bottom: 8px;
+    }
+    .metric-cells {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+    }
+    .metric-name {
+      display: flex;
+      align-items: center;
+      font-weight: 650;
+    }
+    .metric-card .value {
+      font-size: 18px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    .graph-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+    svg {
+      display: block;
+      min-width: 640px;
+    }
+    .graph-node rect {
+      fill: #ffffff;
+      stroke: #b9c2d0;
+      stroke-width: 1.2;
+    }
+    .graph-node text {
+      fill: #344054;
+      font-size: 12px;
+    }
+    .graph-node .graph-kind {
+      font-weight: 700;
+      fill: #1d2939;
+    }
+    .graph-node .graph-meta {
+      fill: var(--muted);
+      font-size: 11px;
+    }
+    .graph-edge {
+      stroke: #98a2b3;
+      stroke-width: 1.4;
+      marker-end: url(#arrow);
+    }
+    .raw-list {
+      columns: 2 260px;
+      margin: 0;
+      padding-left: 18px;
+      font-size: 12px;
+    }
+    @media (max-width: 720px) {
+      .shell { padding: 16px; }
+      h1 { font-size: 22px; }
+      .metric-row { grid-template-columns: 1fr; }
+      table { min-width: 640px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <h1>agent-vcr Behavior Visualization</h1>
+      <div class="meta">
+        <span class="pill">schema 0.2.5</span>
+        <span class="pill">mode compare</span>
+        <span class="pill">generated 2026-06-08T10:53:08Z</span>
+        <span class="pill">redacted true</span>
+        <span class="pill"><code>visual-a-test-first</code></span><span class="pill"><code>visual-b-legacy-no-test</code></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="section">
+      <h2>Summary</h2>
+      <div class="summary-grid">
+        <div class="summary-item"><span class="value">2</span><span class="label">runs</span></div>
+        <div class="summary-item"><span class="value">8</span><span class="label">steps</span></div>
+        <div class="summary-item"><span class="value">8</span><span class="label">significant steps</span></div>
+        <div class="summary-item"><span class="value">1</span><span class="label">divergences</span></div>
+        <div class="summary-item"><span class="value">3</span><span class="label">files</span></div>
+        <div class="summary-item"><span class="value">44</span><span class="label">metric cards</span></div>
+      </div>
+      
+      <div class="section divergence">
+        <h3>First Divergence</h3>
+        <div class="summary">search query divergence at step 1</div>
+        <dl>
+          <dt>baseline</dt><dd><code>visual-a-test-first</code></dd>
+          <dt>compare</dt><dd><code>visual-b-legacy-no-test</code></dd>
+          <dt>kind</dt><dd>step_changed</dd>
+          <dt>step</dt><dd>1</dd>
+          
+        </dl>
+      </div>
+      
+      
+      <div class="section">
+        <h3>First Divergence Per Compared Run</h3>
+        <dl>
+          
+          <dt><code>visual-b-legacy-no-test</code></dt>
+          <dd>baseline has search rg &#34;session&#34; src tests while compare has search rg &#34;cookie&#34; src <span class="small">row 1, step 1</span></dd>
+          
+        </dl>
+      </div>
+      
+      
+    </section>
+
+    <section class="section">
+      <h2>Runs</h2>
+      <div class="runs">
+        
+        <article class="run-card">
+          <div class="run-title">
+            <div>
+              <div class="run-label">visual-a-test-first</div>
+              <div class="run-id"><code>visual-a-test-first</code></div>
+            </div>
+            <span class="badge">completed</span>
+          </div>
+          <dl>
+            <dt>source</dt><dd>visualize-e2e</dd>
+            <dt>steps</dt><dd>5</dd>
+            <dt>started</dt><dd>2026-06-08T11:02:59Z</dd>
+            <dt>ended</dt><dd>2026-06-08T11:03:08Z</dd>
+            <dt>cache_hit</dt><dd>true</dd><dt>source_trace_hash</dt><dd>sha256:739eb377fe750938222ce59198b90b956fe85715c79cc9aaa9a8642302447545</dd><dt>total_steps</dt><dd>6</dd>
+          </dl>
+        </article>
+        
+        <article class="run-card">
+          <div class="run-title">
+            <div>
+              <div class="run-label">visual-b-legacy-no-test</div>
+              <div class="run-id"><code>visual-b-legacy-no-test</code></div>
+            </div>
+            <span class="badge">completed</span>
+          </div>
+          <dl>
+            <dt>source</dt><dd>visualize-e2e</dd>
+            <dt>steps</dt><dd>3</dd>
+            <dt>started</dt><dd>2026-06-08T11:03:59Z</dd>
+            <dt>ended</dt><dd>2026-06-08T11:04:05Z</dd>
+            <dt>cache_hit</dt><dd>true</dd><dt>source_trace_hash</dt><dd>sha256:026772052e5dab3f2d68b4a7382cb5cf1defa7535b3ee0d1f891b58a1641b769</dd><dt>total_steps</dt><dd>4</dd>
+          </dl>
+        </article>
+        
+      </div>
+    </section>
+
+    
+    <section class="section">
+      <h2>Swimlane Timeline</h2>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>row</th>
+              <th>visual-a-test-first<div class="run-id"><code>visual-a-test-first</code></div></th><th>visual-b-legacy-no-test<div class="run-id"><code>visual-b-legacy-no-test</code></div></th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr class="row-divergent">
+              <td>
+                <strong>1</strong>
+                <div class="small">first_divergence:step_changed</div>
+              </td>
+              
+              <td>
+                
+                
+<article class="step-card divergent-step">
+  <div class="step-head">
+    <span class="badge kind-search">search</span>
+    <span class="badge">discovery</span>
+    <span class="small">#1</span>
+  </div>
+  <div class="step-summary">search rg &#34;session&#34; src tests</div>
+  
+  <details>
+    <summary>details</summary>
+    <div class="details-box">
+      <dl>
+        <dt>step id</dt><dd><code>behavior_step_0001</code></dd>
+        <dt>query</dt><dd>session</dd>
+        <dt>command</dt><dd><code>rg &#34;session&#34; src tests</code></dd>
+        
+        <dt>files</dt><dd><code>src, tests</code></dd>
+        <dt>event ids</dt><dd><code>evt-visual-a-test-first-1, evt-visual-a-test-first-2</code></dd>
+        <dt>classifier</dt><dd><code>default</code></dd><dt>command_kind</dt><dd><code>search</code></dd><dt>correlation_id</dt><dd><code>a-search</code></dd><dt>exit_code</dt><dd><code>0</code></dd><dt>fingerprint</dt><dd><code>search|rg &#34;session&#34; src tests||session|rg &#34;session&#34; src tests|shell|src,tests|success</code></dd><dt>raw_event_type</dt><dd><code>shell_command</code></dd><dt>result</dt><dd><code>success</code></dd><dt>source_adapter</dt><dd><code>visualize-e2e</code></dd><dt>source_event_type</dt><dd><code>shell_command</code></dd><dt>tool</dt><dd><code>rg</code></dd><dt>tool_name</dt><dd><code>shell</code></dd>
+      </dl>
+    </div>
+  </details>
+  
+</article>
+
+                
+              </td>
+              
+              <td>
+                
+                
+<article class="step-card divergent-step">
+  <div class="step-head">
+    <span class="badge kind-search">search</span>
+    <span class="badge">discovery</span>
+    <span class="small">#1</span>
+  </div>
+  <div class="step-summary">search rg &#34;cookie&#34; src</div>
+  
+  <details>
+    <summary>details</summary>
+    <div class="details-box">
+      <dl>
+        <dt>step id</dt><dd><code>behavior_step_0001</code></dd>
+        <dt>query</dt><dd>cookie</dd>
+        <dt>command</dt><dd><code>rg &#34;cookie&#34; src</code></dd>
+        
+        <dt>files</dt><dd><code>src</code></dd>
+        <dt>event ids</dt><dd><code>evt-visual-b-legacy-no-test-1, evt-visual-b-legacy-no-test-2</code></dd>
+        <dt>classifier</dt><dd><code>default</code></dd><dt>command_kind</dt><dd><code>search</code></dd><dt>correlation_id</dt><dd><code>b-search</code></dd><dt>exit_code</dt><dd><code>0</code></dd><dt>fingerprint</dt><dd><code>search|rg &#34;cookie&#34; src||cookie|rg &#34;cookie&#34; src|shell|src|success</code></dd><dt>raw_event_type</dt><dd><code>shell_command</code></dd><dt>result</dt><dd><code>success</code></dd><dt>source_adapter</dt><dd><code>visualize-e2e</code></dd><dt>source_event_type</dt><dd><code>shell_command</code></dd><dt>tool</dt><dd><code>rg</code></dd><dt>tool_name</dt><dd><code>shell</code></dd>
+      </dl>
+    </div>
+  </details>
+  
+</article>
+
+                
+              </td>
+              
+            </tr>
+            
+            <tr class="">
+              <td>
+                <strong>2</strong>
+                
+              </td>
+              
+              <td>
+                
+                
+<article class="step-card ">
+  <div class="step-head">
+    <span class="badge kind-inspect-test">inspect_test</span>
+    <span class="badge">inspection</span>
+    <span class="small">#2</span>
+  </div>
+  <div class="step-summary">inspect_test tests/auth/session.test.ts</div>
+  
+  <details>
+    <summary>details</summary>
+    <div class="details-box">
+      <dl>
+        <dt>step id</dt><dd><code>behavior_step_0002</code></dd>
+        
+        
+        <dt>target</dt><dd><code>tests/auth/session.test.ts</code></dd>
+        <dt>files</dt><dd><code>tests/auth/session.test.ts</code></dd>
+        <dt>event ids</dt><dd><code>evt-visual-a-test-first-3</code></dd>
+        <dt>fingerprint</dt><dd><code>inspect_test|tests/auth/session.test.ts|tests/auth/session.test.ts||||tests/auth/session.test.ts|unknown</code></dd><dt>raw_event_type</dt><dd><code>file_read</code></dd><dt>source_adapter</dt><dd><code>visualize-e2e</code></dd><dt>source_event_type</dt><dd><code>file_read</code></dd>
+      </dl>
+    </div>
+  </details>
+  
+</article>
+
+                
+              </td>
+              
+              <td>
+                
+                
+<article class="step-card ">
+  <div class="step-head">
+    <span class="badge kind-read-file">read_file</span>
+    <span class="badge">inspection</span>
+    <span class="small">#2</span>
+  </div>
+  <div class="step-summary">read_file src/auth/legacy-cookie.ts</div>
+  
+  <details>
+    <summary>details</summary>
+    <div class="details-box">
+      <dl>
+        <dt>step id</dt><dd><code>behavior_step_0002</code></dd>
+        
+        
+        <dt>target</dt><dd><code>src/auth/legacy-cookie.ts</code></dd>
+        <dt>files</dt><dd><code>src/auth/legacy-cookie.ts</code></dd>
+        <dt>event ids</dt><dd><code>evt-visual-b-legacy-no-test-3</code></dd>
+        <dt>fingerprint</dt><dd><code>read_file|src/auth/legacy-cookie.ts|src/auth/legacy-cookie.ts||||src/auth/legacy-cookie.ts|unknown</code></dd><dt>raw_event_type</dt><dd><code>file_read</code></dd><dt>source_adapter</dt><dd><code>visualize-e2e</code></dd><dt>source_event_type</dt><dd><code>file_read</code></dd>
+      </dl>
+    </div>
+  </details>
+  
+</article>
+
+                
+              </td>
+              
+            </tr>
+            
+            <tr class="">
+              <td>
+                <strong>3</strong>
+                
+              </td>
+              
+              <td>
+                
+                
+<article class="step-card ">
+  <div class="step-head">
+    <span class="badge kind-read-file">read_file</span>
+    <span class="badge">inspection</span>
+    <span class="small">#3</span>
+  </div>
+  <div class="step-summary">read_file src/auth/session.ts</div>
+  
+  <details>
+    <summary>details</summary>
+    <div class="details-box">
+      <dl>
+        <dt>step id</dt><dd><code>behavior_step_0003</code></dd>
+        
+        
+        <dt>target</dt><dd><code>src/auth/session.ts</code></dd>
+        <dt>files</dt><dd><code>src/auth/session.ts</code></dd>
+        <dt>event ids</dt><dd><code>evt-visual-a-test-first-4</code></dd>
+        <dt>fingerprint</dt><dd><code>read_file|src/auth/session.ts|src/auth/session.ts||||src/auth/session.ts|unknown</code></dd><dt>raw_event_type</dt><dd><code>file_read</code></dd><dt>source_adapter</dt><dd><code>visualize-e2e</code></dd><dt>source_event_type</dt><dd><code>file_read</code></dd>
+      </dl>
+    </div>
+  </details>
+  
+</article>
+
+                
+              </td>
+              
+              <td>
+                
+                
+<article class="step-card ">
+  <div class="step-head">
+    <span class="badge kind-edit-file">edit_file</span>
+    <span class="badge">editing</span>
+    <span class="small">#3</span>
+  </div>
+  <div class="step-summary">edit_file src/auth/legacy-cookie.ts</div>
+  
+  <details>
+    <summary>details</summary>
+    <div class="details-box">
+      <dl>
+        <dt>step id</dt><dd><code>behavior_step_0003</code></dd>
+        
+        
+        <dt>target</dt><dd><code>src/auth/legacy-cookie.ts</code></dd>
+        <dt>files</dt><dd><code>src/auth/legacy-cookie.ts</code></dd>
+        <dt>event ids</dt><dd><code>evt-visual-b-legacy-no-test-4</code></dd>
+        <dt>fingerprint</dt><dd><code>edit_file|src/auth/legacy-cookie.ts|src/auth/legacy-cookie.ts||||src/auth/legacy-cookie.ts|unknown</code></dd><dt>raw_event_type</dt><dd><code>file_patch</code></dd><dt>source_adapter</dt><dd><code>visualize-e2e</code></dd><dt>source_event_type</dt><dd><code>file_patch</code></dd>
+      </dl>
+    </div>
+  </details>
+  
+</article>
+
+                
+              </td>
+              
+            </tr>
+            
+            <tr class="">
+              <td>
+                <strong>4</strong>
+                
+              </td>
+              
+              <td>
+                
+                
+<article class="step-card ">
+  <div class="step-head">
+    <span class="badge kind-edit-file">edit_file</span>
+    <span class="badge">editing</span>
+    <span class="small">#4</span>
+  </div>
+  <div class="step-summary">edit_file src/auth/session.ts</div>
+  
+  <details>
+    <summary>details</summary>
+    <div class="details-box">
+      <dl>
+        <dt>step id</dt><dd><code>behavior_step_0004</code></dd>
+        
+        
+        <dt>target</dt><dd><code>src/auth/session.ts</code></dd>
+        <dt>files</dt><dd><code>src/auth/session.ts</code></dd>
+        <dt>event ids</dt><dd><code>evt-visual-a-test-first-5</code></dd>
+        <dt>fingerprint</dt><dd><code>edit_file|src/auth/session.ts|src/auth/session.ts||||src/auth/session.ts|unknown</code></dd><dt>raw_event_type</dt><dd><code>file_patch</code></dd><dt>source_adapter</dt><dd><code>visualize-e2e</code></dd><dt>source_event_type</dt><dd><code>file_patch</code></dd>
+      </dl>
+    </div>
+  </details>
+  
+</article>
+
+                
+              </td>
+              
+              <td>
+                
+                <span class="gap">-</span>
+                
+              </td>
+              
+            </tr>
+            
+            <tr class="">
+              <td>
+                <strong>5</strong>
+                
+              </td>
+              
+              <td>
+                
+                
+<article class="step-card ">
+  <div class="step-head">
+    <span class="badge kind-run-test">run_test</span>
+    <span class="badge">validation</span>
+    <span class="small">#5</span>
+  </div>
+  <div class="step-summary">run_test npm test</div>
+  
+  <details>
+    <summary>details</summary>
+    <div class="details-box">
+      <dl>
+        <dt>step id</dt><dd><code>behavior_step_0005</code></dd>
+        
+        <dt>command</dt><dd><code>npm test</code></dd>
+        
+        
+        <dt>event ids</dt><dd><code>evt-visual-a-test-first-6, evt-visual-a-test-first-7</code></dd>
+        <dt>classifier</dt><dd><code>default</code></dd><dt>command_kind</dt><dd><code>run_test</code></dd><dt>correlation_id</dt><dd><code>a-test</code></dd><dt>exit_code</dt><dd><code>0</code></dd><dt>fingerprint</dt><dd><code>run_test|npm test|||npm test|shell||success</code></dd><dt>raw_event_type</dt><dd><code>shell_command</code></dd><dt>result</dt><dd><code>success</code></dd><dt>source_adapter</dt><dd><code>visualize-e2e</code></dd><dt>source_event_type</dt><dd><code>shell_command</code></dd><dt>tool</dt><dd><code>npm</code></dd><dt>tool_name</dt><dd><code>shell</code></dd>
+      </dl>
+    </div>
+  </details>
+  
+</article>
+
+                
+              </td>
+              
+              <td>
+                
+                <span class="gap">-</span>
+                
+              </td>
+              
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+
+    
+    <section class="section">
+      <h2>Auxiliary Path Graph</h2>
+      <p class="small">Compact path overview. Use Swimlane Timeline as the source of truth; this auxiliary view may scroll horizontally.</p>
+      <div class="graph-wrap">
+        <svg width="2624" height="190" viewBox="0 0 2624 190" role="img" aria-label="behavior path graph">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#98a2b3"></path>
+            </marker>
+          </defs>
+          
+          <line class="graph-edge" x1="272" y1="96" x2="352" y2="96">
+            <title>visual-a-test-first</title>
+          </line>
+          
+          <line class="graph-edge" x1="592" y1="96" x2="672" y2="96">
+            <title>visual-a-test-first</title>
+          </line>
+          
+          <line class="graph-edge" x1="912" y1="96" x2="992" y2="96">
+            <title>visual-a-test-first</title>
+          </line>
+          
+          <line class="graph-edge" x1="1232" y1="96" x2="1312" y2="96">
+            <title>visual-a-test-first</title>
+          </line>
+          
+          <line class="graph-edge" x1="1872" y1="96" x2="1952" y2="96">
+            <title>visual-b-legacy-no-test</title>
+          </line>
+          
+          <line class="graph-edge" x1="2192" y1="96" x2="2272" y2="96">
+            <title>visual-b-legacy-no-test</title>
+          </line>
+          
+          
+          <g class="graph-node kind-search" transform="translate(32,52)">
+            <title>kind: search
+summary: search rg &#34;session&#34; src tests
+runs: visual-a-test-first</title>
+            <rect width="240" height="88" rx="8"></rect>
+            <text class="graph-kind" x="12" y="24">search</text>
+            <text x="12" y="48">search rg &#34;session&#34; src tests</text>
+            <text class="graph-meta" x="12" y="70">visual-a-test-first</text>
+          </g>
+          
+          <g class="graph-node kind-inspect-test" transform="translate(352,52)">
+            <title>kind: inspect_test
+summary: inspect_test tests/auth/session.test.ts
+runs: visual-a-test-first</title>
+            <rect width="240" height="88" rx="8"></rect>
+            <text class="graph-kind" x="12" y="24">inspect_test</text>
+            <text x="12" y="48">inspect_test tests/auth/sessi...</text>
+            <text class="graph-meta" x="12" y="70">visual-a-test-first</text>
+          </g>
+          
+          <g class="graph-node kind-read-file" transform="translate(672,52)">
+            <title>kind: read_file
+summary: read_file src/auth/session.ts
+runs: visual-a-test-first</title>
+            <rect width="240" height="88" rx="8"></rect>
+            <text class="graph-kind" x="12" y="24">read_file</text>
+            <text x="12" y="48">read_file src/auth/session.ts</text>
+            <text class="graph-meta" x="12" y="70">visual-a-test-first</text>
+          </g>
+          
+          <g class="graph-node kind-edit-file" transform="translate(992,52)">
+            <title>kind: edit_file
+summary: edit_file src/auth/session.ts
+runs: visual-a-test-first</title>
+            <rect width="240" height="88" rx="8"></rect>
+            <text class="graph-kind" x="12" y="24">edit_file</text>
+            <text x="12" y="48">edit_file src/auth/session.ts</text>
+            <text class="graph-meta" x="12" y="70">visual-a-test-first</text>
+          </g>
+          
+          <g class="graph-node kind-run-test" transform="translate(1312,52)">
+            <title>kind: run_test
+summary: run_test npm test
+runs: visual-a-test-first</title>
+            <rect width="240" height="88" rx="8"></rect>
+            <text class="graph-kind" x="12" y="24">run_test</text>
+            <text x="12" y="48">run_test npm test</text>
+            <text class="graph-meta" x="12" y="70">visual-a-test-first</text>
+          </g>
+          
+          <g class="graph-node kind-search" transform="translate(1632,52)">
+            <title>kind: search
+summary: search rg &#34;cookie&#34; src
+runs: visual-b-legacy-no-test</title>
+            <rect width="240" height="88" rx="8"></rect>
+            <text class="graph-kind" x="12" y="24">search</text>
+            <text x="12" y="48">search rg &#34;cookie&#34; src</text>
+            <text class="graph-meta" x="12" y="70">visual-b-legacy-no-test</text>
+          </g>
+          
+          <g class="graph-node kind-read-file" transform="translate(1952,52)">
+            <title>kind: read_file
+summary: read_file src/auth/legacy-cookie.ts
+runs: visual-b-legacy-no-test</title>
+            <rect width="240" height="88" rx="8"></rect>
+            <text class="graph-kind" x="12" y="24">read_file</text>
+            <text x="12" y="48">read_file src/auth/legacy-coo...</text>
+            <text class="graph-meta" x="12" y="70">visual-b-legacy-no-test</text>
+          </g>
+          
+          <g class="graph-node kind-edit-file" transform="translate(2272,52)">
+            <title>kind: edit_file
+summary: edit_file src/auth/legacy-cookie.ts
+runs: visual-b-legacy-no-test</title>
+            <rect width="240" height="88" rx="8"></rect>
+            <text class="graph-kind" x="12" y="24">edit_file</text>
+            <text x="12" y="48">edit_file src/auth/legacy-coo...</text>
+            <text class="graph-meta" x="12" y="70">visual-b-legacy-no-test</text>
+          </g>
+          
+        </svg>
+      </div>
+    </section>
+    
+
+    
+    <section class="section">
+      <h2>Search Scope Compare</h2>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>scope</th>
+              <th>visual-a-test-first</th><th>visual-b-legacy-no-test</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td class="file-path">src</td>
+              
+              <td>
+                <div class="file-use level-info">
+                  
+                  <strong>search 1</strong>
+                  <span>first 1 / last 1</span>
+                  <span>session</span>
+                  
+                </div>
+              </td>
+              
+              <td>
+                <div class="file-use level-info">
+                  
+                  <strong>search 1</strong>
+                  <span>first 1 / last 1</span>
+                  <span>cookie</span>
+                  
+                </div>
+              </td>
+              
+            </tr>
+            
+            <tr>
+              <td class="file-path">tests</td>
+              
+              <td>
+                <div class="file-use level-info">
+                  
+                  <strong>search 1</strong>
+                  <span>first 1 / last 1</span>
+                  <span>session</span>
+                  
+                </div>
+              </td>
+              
+              <td>
+                <div class="file-use level-muted">
+                  
+                  <strong>-</strong>
+                  <span>first - / last -</span>
+                  
+                </div>
+              </td>
+              
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+
+    
+    <section class="section">
+      <h2>File Access Compare</h2>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>file</th>
+              <th>visual-a-test-first</th><th>visual-b-legacy-no-test</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td class="file-path">src/auth/legacy-cookie.ts</td>
+              
+              <td>
+                <div class="file-use level-muted">
+                  <strong>-</strong>
+                  <span>first - / last -</span>
+                  
+                </div>
+              </td>
+              
+              <td>
+                <div class="file-use level-bad">
+                  <strong>read 1 / edit 1</strong>
+                  <span>first 2 / last 3</span>
+                  <span>read to edit</span>
+                </div>
+              </td>
+              
+            </tr>
+            
+            <tr>
+              <td class="file-path">src/auth/session.ts</td>
+              
+              <td>
+                <div class="file-use level-bad">
+                  <strong>read 1 / edit 1</strong>
+                  <span>first 3 / last 4</span>
+                  <span>read to edit</span>
+                </div>
+              </td>
+              
+              <td>
+                <div class="file-use level-muted">
+                  <strong>-</strong>
+                  <span>first - / last -</span>
+                  
+                </div>
+              </td>
+              
+            </tr>
+            
+            <tr>
+              <td class="file-path">tests/auth/session.test.ts</td>
+              
+              <td>
+                <div class="file-use level-good">
+                  <strong>read 1</strong>
+                  <span>first 2 / last 2</span>
+                  <span>read to read</span>
+                </div>
+              </td>
+              
+              <td>
+                <div class="file-use level-muted">
+                  <strong>-</strong>
+                  <span>first - / last -</span>
+                  
+                </div>
+              </td>
+              
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+
+    
+    <section class="section">
+      <h2>Metrics Cards</h2>
+      <div class="metric-groups">
+        
+        <section>
+          <h3>Context discipline</h3>
+          
+          <div class="metric-row">
+            <div class="metric-name">Read tests before edit</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">yes</div>
+              </article>
+              
+              <article class="metric-card level-warn">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">no</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Legacy path touched</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">no</div>
+              </article>
+              
+              <article class="metric-card level-warn">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">yes</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Files read</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">2</div>
+              </article>
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">1</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Repeated reads</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">0</div>
+              </article>
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">0</div>
+              </article>
+              
+            </div>
+          </div>
+          
+        </section>
+        
+        <section>
+          <h3>Validation behavior</h3>
+          
+          <div class="metric-row">
+            <div class="metric-name">Ran tests after edit</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">yes</div>
+              </article>
+              
+              <article class="metric-card level-bad">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">no</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Ran any tests</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">yes</div>
+              </article>
+              
+              <article class="metric-card level-bad">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">no</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Failed test runs</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">0</div>
+              </article>
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">0</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Skipped validation</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">no</div>
+              </article>
+              
+              <article class="metric-card level-bad">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">yes</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Ignored failed command</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">no</div>
+              </article>
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">no</div>
+              </article>
+              
+            </div>
+          </div>
+          
+        </section>
+        
+        <section>
+          <h3>Edit scope</h3>
+          
+          <div class="metric-row">
+            <div class="metric-name">Files edited</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">1</div>
+              </article>
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">1</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Source files edited</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">1</div>
+              </article>
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">1</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Test files edited</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">0</div>
+              </article>
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">0</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Source/test edit ratio</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-warn">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">1.00</div>
+              </article>
+              
+              <article class="metric-card level-warn">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">1.00</div>
+              </article>
+              
+            </div>
+          </div>
+          
+        </section>
+        
+        <section>
+          <h3>Tool efficiency</h3>
+          
+          <div class="metric-row">
+            <div class="metric-name">Tool calls</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">2</div>
+              </article>
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">1</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Shell commands</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">unavailable</div>
+              </article>
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">unavailable</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Search steps</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">1</div>
+              </article>
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">1</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Total steps</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">6</div>
+              </article>
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">4</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Failed commands</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">0</div>
+              </article>
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">0</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Repeated commands</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">unavailable</div>
+              </article>
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">unavailable</div>
+              </article>
+              
+            </div>
+          </div>
+          
+        </section>
+        
+        <section>
+          <h3>Recovery behavior</h3>
+          
+          <div class="metric-row">
+            <div class="metric-name">Recovered after failure</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">no</div>
+              </article>
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">no</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Reran tests after failure</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">no</div>
+              </article>
+              
+              <article class="metric-card level-info">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">no</div>
+              </article>
+              
+            </div>
+          </div>
+          
+          <div class="metric-row">
+            <div class="metric-name">Repeated failures</div>
+            <div class="metric-cells">
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-a-test-first</div>
+                <div class="value">no</div>
+              </article>
+              
+              <article class="metric-card level-good">
+                <div class="small">visual-b-legacy-no-test</div>
+                <div class="value">no</div>
+              </article>
+              
+            </div>
+          </div>
+          
+        </section>
+        
+      </div>
+    </section>
+    
+
+    
+    <section class="section">
+      <h2>Raw References</h2>
+      <ul class="raw-list">
+        <li><code>evt-visual-a-test-first-1</code></li><li><code>evt-visual-a-test-first-2</code></li><li><code>evt-visual-a-test-first-3</code></li><li><code>evt-visual-a-test-first-4</code></li><li><code>evt-visual-a-test-first-5</code></li><li><code>evt-visual-a-test-first-6</code></li><li><code>evt-visual-a-test-first-7</code></li><li><code>evt-visual-b-legacy-no-test-1</code></li><li><code>evt-visual-b-legacy-no-test-2</code></li><li><code>evt-visual-b-legacy-no-test-3</code></li><li><code>evt-visual-b-legacy-no-test-4</code></li>
+      </ul>
+    </section>
+    
+  </main>
+</body>
+</html>
+
+

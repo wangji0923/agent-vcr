@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}}</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --ink: #19212a;
+      --muted: #657282;
+      --line: #d9dee7;
+      --soft: #edf1f6;
+      --accent: #0f766e;
+      --accent-soft: #dff7f3;
+      --warn: #b45309;
+      --warn-soft: #fff3d6;
+      --bad: #b42318;
+      --bad-soft: #ffe4e1;
+      --good: #047857;
+      --good-soft: #ddf6e8;
+      --code: #111827;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1, h2, h3 {
+      margin: 0;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+    h1 { font-size: 28px; }
+    h2 { font-size: 18px; margin-bottom: 14px; }
+    h3 { font-size: 14px; margin-bottom: 10px; }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    code {
+      color: var(--code);
+      overflow-wrap: anywhere;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 26px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--soft);
+      padding: 2px 9px;
+      white-space: nowrap;
+    }
+    .section {
+      margin-top: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 18px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }
+    .summary-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfe;
+    }
+    .summary-item .value {
+      display: block;
+      font-size: 24px;
+      font-weight: 650;
+    }
+    .summary-item .label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .runs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+    .run-card, .metric-card, .step-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      padding: 12px;
+    }
+    .run-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .run-label {
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+    .run-id, .small {
+      color: var(--muted);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+    dl {
+      display: grid;
+      grid-template-columns: minmax(90px, max-content) 1fr;
+      gap: 6px 10px;
+      margin: 10px 0 0;
+      font-size: 13px;
+    }
+    dt { color: var(--muted); }
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+    .divergence {
+      border-color: #f2c94c;
+      background: var(--warn-soft);
+    }
+    .divergence .summary {
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+    .warnings {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--warn);
+    }
+    .scroll {
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f4f6f9;
+      color: #344054;
+      font-weight: 650;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tr.row-divergent td {
+      background: var(--warn-soft);
+      border-top: 2px solid #f2c94c;
+      border-bottom: 2px solid #f2c94c;
+    }
+    .gap {
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    .step-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--soft);
+      color: #344054;
+      white-space: nowrap;
+    }
+    .kind-search, .kind-read-file, .kind-inspect-test { background: #e8f1ff; color: #175cd3; }
+    .kind-edit-file, .kind-install-dependency { background: #fff0e5; color: #b54708; }
+    .kind-run-test, .kind-run-build, .kind-skip-validation { background: var(--good-soft); color: var(--good); }
+    .kind-recover-from-error { background: #f4e8ff; color: #6941c6; }
+    .step-summary {
+      overflow-wrap: anywhere;
+      font-weight: 600;
+    }
+    .step-card.divergent-step {
+      border-color: #f2c94c;
+      background: #fffaf0;
+    }
+    details {
+      margin-top: 8px;
+    }
+    summary {
+      cursor: pointer;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .details-box {
+      margin-top: 8px;
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+    }
+    .lane-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 10px;
+    }
+    .lane-stack {
+      display: grid;
+      gap: 8px;
+    }
+    .file-path {
+      overflow-wrap: anywhere;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    .file-use {
+      display: grid;
+      gap: 3px;
+    }
+    .level-good { background: var(--good-soft); color: var(--good); }
+    .level-warn { background: var(--warn-soft); color: var(--warn); }
+    .level-bad { background: var(--bad-soft); color: var(--bad); }
+    .level-info, .level-neutral { background: var(--soft); color: #344054; }
+    .level-muted { color: var(--muted); }
+    .metric-groups {
+      display: grid;
+      gap: 14px;
+    }
+    .metric-row {
+      display: grid;
+      grid-template-columns: minmax(170px, 240px) 1fr;
+      gap: 10px;
+      align-items: stretch;
+      margin-bottom: 8px;
+    }
+    .metric-cells {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+    }
+    .metric-name {
+      display: flex;
+      align-items: center;
+      font-weight: 650;
+    }
+    .metric-card .value {
+      font-size: 18px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    .graph-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+    svg {
+      display: block;
+      min-width: 640px;
+    }
+    .graph-node rect {
+      fill: #ffffff;
+      stroke: #b9c2d0;
+      stroke-width: 1.2;
+    }
+    .graph-node text {
+      fill: #344054;
+      font-size: 12px;
+    }
+    .graph-node .graph-kind {
+      font-weight: 700;
+      fill: #1d2939;
+    }
+    .graph-node .graph-meta {
+      fill: var(--muted);
+      font-size: 11px;
+    }
+    .graph-edge {
+      stroke: #98a2b3;
+      stroke-width: 1.4;
+      marker-end: url(#arrow);
+    }
+    .raw-list {
+      columns: 2 260px;
+      margin: 0;
+      padding-left: 18px;
+      font-size: 12px;
+    }
+    @media (max-width: 720px) {
+      .shell { padding: 16px; }
+      h1 { font-size: 22px; }
+      .metric-row { grid-template-columns: 1fr; }
+      table { min-width: 640px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <h1>{{.Title}}</h1>
+      <div class="meta">
+        <span class="pill">schema {{.SchemaVersion}}</span>
+        <span class="pill">mode {{.Mode}}</span>
+        {{if .GeneratedAt}}<span class="pill">generated {{.GeneratedAt}}</span>{{end}}
+        <span class="pill">redacted {{.Redacted}}</span>
+        {{range .RunIDs}}<span class="pill"><code>{{.}}</code></span>{{end}}
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="section">
+      <h2>Summary</h2>
+      <div class="summary-grid">
+        <div class="summary-item"><span class="value">{{.Summary.RunCount}}</span><span class="label">runs</span></div>
+        <div class="summary-item"><span class="value">{{.Summary.StepCount}}</span><span class="label">steps</span></div>
+        <div class="summary-item"><span class="value">{{.Summary.SignificantStepCount}}</span><span class="label">significant steps</span></div>
+        <div class="summary-item"><span class="value">{{.Summary.DivergenceCount}}</span><span class="label">divergences</span></div>
+        <div class="summary-item"><span class="value">{{.Summary.FileCount}}</span><span class="label">files</span></div>
+        <div class="summary-item"><span class="value">{{.Summary.MetricsCardCount}}</span><span class="label">metric cards</span></div>
+      </div>
+      {{if .HasDivergence}}
+      <div class="section divergence">
+        <h3>First Divergence</h3>
+        <div class="summary">{{.FirstDivergence.Summary}}</div>
+        <dl>
+          <dt>baseline</dt><dd><code>{{.FirstDivergence.BaselineRunID}}</code></dd>
+          <dt>compare</dt><dd><code>{{.FirstDivergence.CompareRunID}}</code></dd>
+          <dt>kind</dt><dd>{{.FirstDivergence.Kind}}</dd>
+          <dt>step</dt><dd>{{.FirstDivergence.StepIndex}}</dd>
+          {{if .FirstDivergence.AlignmentIndex}}<dt>alignment row</dt><dd>{{.FirstDivergence.AlignmentIndex}}</dd>{{end}}
+        </dl>
+      </div>
+      {{end}}
+      {{if .DivergencesByRun}}
+      <div class="section">
+        <h3>First Divergence Per Compared Run</h3>
+        <dl>
+          {{range .DivergencesByRun}}
+          <dt><code>{{.CompareRunID}}</code></dt>
+          <dd>{{.Summary}} <span class="small">row {{.AlignmentIndex}}, step {{.StepIndex}}</span></dd>
+          {{end}}
+        </dl>
+      </div>
+      {{end}}
+      {{if .Warnings}}
+      <ul class="warnings">
+        {{range .Warnings}}<li>{{.}}</li>{{end}}
+      </ul>
+      {{end}}
+    </section>
+
+    <section class="section">
+      <h2>Runs</h2>
+      <div class="runs">
+        {{range .Runs}}
+        <article class="run-card">
+          <div class="run-title">
+            <div>
+              <div class="run-label">{{.Label}}</div>
+              <div class="run-id"><code>{{.RunID}}</code></div>
+            </div>
+            <span class="badge">{{.Status}}</span>
+          </div>
+          <dl>
+            <dt>source</dt><dd>{{.Source}}</dd>
+            <dt>steps</dt><dd>{{.StepCount}}</dd>
+            {{if .StartedAt}}<dt>started</dt><dd>{{.StartedAt}}</dd>{{end}}
+            {{if .EndedAt}}<dt>ended</dt><dd>{{.EndedAt}}</dd>{{end}}
+            {{range .SummaryPairs}}<dt>{{.Key}}</dt><dd>{{.Value}}</dd>{{end}}
+          </dl>
+        </article>
+        {{end}}
+      </div>
+    </section>
+
+    {{if .HasAlignment}}
+    <section class="section">
+      <h2>Swimlane Timeline</h2>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>row</th>
+              {{range .Runs}}<th>{{.Label}}<div class="run-id"><code>{{.RunID}}</code></div></th>{{end}}
+            </tr>
+          </thead>
+          <tbody>
+            {{range .Alignment}}
+            <tr class="{{if .IsDivergent}}row-divergent{{end}}">
+              <td>
+                <strong>{{.RowIndex}}</strong>
+                {{if .Reason}}<div class="small">{{.Reason}}</div>{{end}}
+              </td>
+              {{range .Cells}}
+              <td>
+                {{if .Gap}}
+                <span class="gap">-</span>
+                {{else}}
+                {{template "step" .Step}}
+                {{end}}
+              </td>
+              {{end}}
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {{else}}
+    <section class="section">
+      <h2>Behavior Timeline</h2>
+      <div class="lane-grid">
+        {{range .Lanes}}
+        <article class="lane-stack">
+          <h3>{{.Label}}</h3>
+          {{range .Steps}}{{template "step" .}}{{end}}
+        </article>
+        {{end}}
+      </div>
+    </section>
+    {{end}}
+
+    {{if .HasPathGraph}}
+    <section class="section">
+      <h2>Auxiliary Path Graph</h2>
+      <p class="small">Compact path overview. Use Swimlane Timeline as the source of truth; this auxiliary view may scroll horizontally.</p>
+      <div class="graph-wrap">
+        <svg width="{{.PathGraph.Width}}" height="{{.PathGraph.Height}}" viewBox="0 0 {{.PathGraph.Width}} {{.PathGraph.Height}}" role="img" aria-label="behavior path graph">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#98a2b3"></path>
+            </marker>
+          </defs>
+          {{range .PathGraph.Edges}}
+          <line class="graph-edge" x1="{{.X1}}" y1="{{.Y1}}" x2="{{.X2}}" y2="{{.Y2}}">
+            <title>{{.RunIDs}}</title>
+          </line>
+          {{end}}
+          {{range .PathGraph.Nodes}}
+          <g class="graph-node kind-{{.KindCls}}" transform="translate({{.X}},{{.Y}})">
+            <title>{{.Title}}</title>
+            <rect width="{{$.PathGraph.NodeWidth}}" height="{{$.PathGraph.NodeHeight}}" rx="8"></rect>
+            <text class="graph-kind" x="12" y="24">{{.ShortKind}}</text>
+            <text x="12" y="48">{{.ShortLabel}}</text>
+            <text class="graph-meta" x="12" y="70">{{.ShortRunIDs}}</text>
+          </g>
+          {{end}}
+        </svg>
+      </div>
+    </section>
+    {{end}}
+
+    {{if .HasSearchScopes}}
+    <section class="section">
+      <h2>Search Scope Compare</h2>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>scope</th>
+              {{range .Runs}}<th>{{.Label}}</th>{{end}}
+            </tr>
+          </thead>
+          <tbody>
+            {{range .SearchScopes}}
+            <tr>
+              <td class="file-path">{{.Scope}}</td>
+              {{range .Cells}}
+              <td>
+                <div class="file-use level-{{.Level}}">
+                  {{if .SearchCount}}
+                  <strong>search {{.SearchCount}}</strong>
+                  <span>first {{.FirstStep}} / last {{.LastStep}}</span>
+                  {{if .Queries}}<span>{{.Queries}}</span>{{end}}
+                  {{else}}
+                  <strong>-</strong>
+                  <span>first - / last -</span>
+                  {{end}}
+                </div>
+              </td>
+              {{end}}
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {{end}}
+
+    {{if .HasFileAccess}}
+    <section class="section">
+      <h2>File Access Compare</h2>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>file</th>
+              {{range .Runs}}<th>{{.Label}}</th>{{end}}
+            </tr>
+          </thead>
+          <tbody>
+            {{range .FileAccess}}
+            <tr>
+              <td class="file-path">{{.Path}}</td>
+              {{range .Cells}}
+              <td>
+                <div class="file-use level-{{.Level}}">
+                  <strong>{{.Summary}}</strong>
+                  <span>first {{.FirstStep}} / last {{.LastStep}}</span>
+                  {{if .FirstAction}}<span>{{.FirstAction}} to {{.LastAction}}</span>{{end}}
+                </div>
+              </td>
+              {{end}}
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {{end}}
+
+    {{if .HasMetrics}}
+    <section class="section">
+      <h2>Metrics Cards</h2>
+      <div class="metric-groups">
+        {{range .MetricGroups}}
+        <section>
+          <h3>{{.Group}}</h3>
+          {{range .Rows}}
+          <div class="metric-row">
+            <div class="metric-name">{{.Name}}</div>
+            <div class="metric-cells">
+              {{range .Cells}}
+              <article class="metric-card level-{{.Level}}">
+                <div class="small">{{.Label}}</div>
+                <div class="value">{{.Value}}</div>
+              </article>
+              {{end}}
+            </div>
+          </div>
+          {{end}}
+        </section>
+        {{end}}
+      </div>
+    </section>
+    {{end}}
+
+    {{if .HasRawReferences}}
+    <section class="section">
+      <h2>Raw References</h2>
+      <ul class="raw-list">
+        {{range .RawEventIDs}}<li><code>{{.}}</code></li>{{end}}
+      </ul>
+    </section>
+    {{end}}
+  </main>
+</body>
+</html>
+
+{{define "step"}}
+<article class="step-card {{if .Divergent}}divergent-step{{end}}">
+  <div class="step-head">
+    <span class="badge kind-{{.KindClass}}">{{.Kind}}</span>
+    {{if .Phase}}<span class="badge">{{.Phase}}</span>{{end}}
+    <span class="small">#{{.Index}}</span>
+  </div>
+  <div class="step-summary">{{.Summary}}</div>
+  {{if .HasDetails}}
+  <details>
+    <summary>details</summary>
+    <div class="details-box">
+      <dl>
+        {{if .StepID}}<dt>step id</dt><dd><code>{{.StepID}}</code></dd>{{end}}
+        {{if .Query}}<dt>query</dt><dd>{{.Query}}</dd>{{end}}
+        {{if .Command}}<dt>command</dt><dd><code>{{.Command}}</code></dd>{{end}}
+        {{if .Target}}<dt>target</dt><dd><code>{{.Target}}</code></dd>{{end}}
+        {{if .Files}}<dt>files</dt><dd><code>{{.FileList}}</code></dd>{{end}}
+        {{if .EventIDs}}<dt>event ids</dt><dd><code>{{.EventIDList}}</code></dd>{{end}}
+        {{range .Attributes}}<dt>{{.Key}}</dt><dd><code>{{.Value}}</code></dd>{{end}}
+      </dl>
+    </div>
+  </details>
+  {{end}}
+</article>
+{{end}}

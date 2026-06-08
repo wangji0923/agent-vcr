@@ -128,6 +128,43 @@ agent-vcr behavior metrics latest
 `agent-vcr diff` remains the event-level diff. `agent-vcr behavior diff` is the
 BehaviorSignature-level diff and reports the first behavior divergence.
 
+## v0.2.5: Behavior Visualization
+
+v0.2.5 is the visualization layer for v0.2 behavior data. It does not explain
+why a harness changed behavior; it makes the observed behavior path easier to
+inspect.
+
+Supported visualization scope:
+
+- single-run behavior timeline
+- two-run swimlane comparison
+- small multi-run lane comparison for user-selected runs
+- first divergence highlight
+- file access comparison
+- search scope comparison
+- metrics cards
+- static JSON and offline HTML output
+
+Example commands:
+
+```bash
+agent-vcr visualize latest --json
+agent-vcr visualize latest --html --output behavior.html
+agent-vcr visualize run-a run-b --html --output compare.html
+agent-vcr visualize run-a run-b run-c --json
+```
+
+v0.2.5 remains agent-agnostic and consumes normalized trace and BehaviorSignature
+data. It does not implement HarnessMetadata, HarnessDiff, Matrix Compare,
+Regression/baseline, new adapters, LLM Explain, deterministic replay, or cloud
+dashboard features. v0.3 is the planned point where HarnessMetadata and pairwise
+HarnessDiff enter the product.
+
+The `path_graph` JSON field and the HTML Path Graph section are auxiliary. The
+Swimlane Timeline remains the source of truth for behavior-path comparison.
+Search scopes such as `src` and `tests` are reported under `search_scopes`, not
+as file read/edit rows in `file_access`.
+
 ## v0.3: HarnessMetadata + Pairwise HarnessDiff
 
 Planned for v0.3, not implemented in v0.2:

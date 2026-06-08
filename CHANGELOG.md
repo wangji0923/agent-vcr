@@ -4,6 +4,19 @@ All notable changes are tracked here.
 
 ## Unreleased
 
+### v0.2.5
+
+- Add Behavior Visualization docs for single-run timelines, two-run swimlane
+  compare, small multi-run lane compare, first divergence highlight, file access
+  compare, and metrics cards.
+- Add a v0.2.5 E2E fixture script that constructs local behavior runs without a
+  real Codex session and validates `agent-vcr visualize` JSON and HTML output.
+- Add release checklist coverage for v0.2.5 visualization acceptance.
+- Keep HarnessMetadata, HarnessDiff, Matrix Compare, Regression/baseline, new
+  adapters, LLM Explain, deterministic replay, and cloud dashboard out of
+  v0.2.5 scope. HarnessMetadata and pairwise HarnessDiff remain planned for
+  v0.3.
+
 ## 0.2.0
 
 - Add `internal/behavior` domain model, event-to-behavior extraction, command
